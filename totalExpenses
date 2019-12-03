@@ -1,0 +1,277 @@
+<!-- 修船管理 费用统计页面 2019-11-20-->
+<template>
+  <div class="cont-main m-10" v-loading="initialLoading">
+      <ws-normal-table
+        :data="tables"
+        border
+        tooltip-effect="dark"
+        :span-method="objectSpanMethod"
+        style="width: 100%">
+        <template v-for="(v) in headers">
+          <ws-table-column
+            width ="150"
+            fixed
+            align="center"
+            :show-overflow-tooltip="true"
+            :prop="v.dataItem"
+            :label="v.shipyardName"
+            :key="v.dataItem">
+          </ws-table-column>
+        </template>
+        <template v-for="(col) in resultShips">
+          <ws-table-column
+            align="center"
+            :show-overflow-tooltip="true"
+            :prop="col.dataItem"
+            :label="col.shipyardName"
+            :key="col.dataItem">
+          </ws-table-column>
+        </template>
+        <ws-table-column width ="150" align="center" label="合计">
+          <template slot-scope="scope">
+            {{ getParams(scope.row) }}
+          </template>
+        </ws-table-column>
+      </ws-normal-table>
+  </div>
+</template>
+
+<script>
+// 结算单一览查询api接口
+import { getCalculateExpense } from '@/api/shipRepairManagement/voyageRepairManagement/totalExpenses/statisticsApi';
+import { filter } from 'minimatch';
+export default {
+  name: 'totalExpenses',
+  components: {},
+  data() {
+    return {
+      initialLoading: false,
+      dateFilters: [],
+      calculateDate: {
+        startDate: '',
+        endDate: ''
+      },
+      tables: [],
+      headers: [{
+        dataItem: 'vessel',
+        shipyardName: '船舶'
+      }],
+      resultShips: [],
+      remittances: [],
+    }
+  },
+  created() {
+    this.initialization();
+  },
+  methods: {
+    /**
+     * initialization
+     */
+    initialization() {
+      this.initialLoading = true;
+      this.tables = []
+      this.remittances = []
+      this.resultShips = []
+      let shipList = []
+      getCalculateExpense({startDate:this.dateFilters[0],endDate:this.dateFilters[1]}).then(response => {
+        if(response.data) {
+          this.processing(response.data)
+          this.initialLoading = false;
+        }
+      });
+    },
+
+    /**
+     * 数据二次处理函数
+     * processing
+     */
+    processing(data) {
+      
+      let newViews =[]
+      newViews = this.deepClone(data.calculateExpenseViews)
+      if(newViews.length === 0) return
+      /**
+       * 获取有过维修的船厂
+       */
+      this.resultShips = [];
+      let shipYard = []
+      data.shipyardList.map(ship=> {
+        shipYard.push(ship.shipyardId)
+        this.resultShips.push({dataItem: 'cash_' + ship.shipyardId, shipyardName: ship.shipyardName})
+      })
+      /**
+       * 设置tables表格数据
+       */
+      // 创建新对象，补齐修船厂，并合并对象
+       let temCash = {}
+        for(let keyYard of shipYard) {
+          temCash['cash_' + keyYard] = '--'
+        }
+      for (let views of newViews) {
+        temCash['vessel'] = views.vesselName
+        let newObj = {}
+        newObj['vessel'] = views.vesselName
+        for (let amount of views.shipyardAmountViews) {
+          newObj['cash_' + amount.shipyardId] = amount.totalAmount + '\xa0' + amount.currency
+        }
+        this.tables.push(newObj)
+      }
+      /**
+       * 启动计算函数
+       */
+        this.tables.map(i=>{
+          Object.assign(i, {...temCash, ...i})
+        })
+      data.currencyList.map(item=> { this.remittances.push('\xa0' + item.currency) })
+      this.remittances.forEach(item => { this.costStatistics(this.tables, item) })
+    },
+
+
+    /**
+     * 纵向总和计算
+     * costStatistics
+     * ary:数据集合
+     * units:币种集合
+     */
+    costStatistics(ary, units) {
+      /** !每次需要克隆一次数据,不然数据作用域会被污染 */
+      let newList =[]
+      newList = this.deepClone(ary)
+      let reg = /^[\u4e00-\u9fa5]*$/
+      for(let obj of newList) {
+        let keys = Object.keys(obj)
+        for(let key of keys) {
+          if(!reg.test(obj[key]) && !obj[key].includes(units)){
+            obj[key] = '0'
+          }
+        }
+      }
+
+      let temArray = []
+      for (let obj of newList) {
+        temArray = temArray.concat(Object.keys(obj))
+      }
+
+      let tmpSet = new Set(temArray)
+      let resObj = {}
+      tmpSet.forEach(key => {
+        resObj[key] = '0'
+      })
+
+      for (let obj of newList) {
+        tmpSet.forEach(key => {
+          if(obj[key] !== '0') {
+            if(!reg.test(obj[key])){
+            let temKey = parseFloat(obj[key]).toFixed(2)
+            resObj[key] = resObj[key] + '/' + temKey
+            } 
+            if(obj.vessel === '0') {
+              resObj['vessel'] = '合计'
+            }
+          }
+        })
+      }
+
+      for(let res in resObj) {
+        if(!reg.test(resObj[res])) {
+        if(this.summation(resObj[res].split('/'), units).toString().substring(0, 1) === '0') {
+          if(res !== 'vessel') {
+            resObj[res] = '--'
+          } else {
+            resObj[res] = '合计'
+          }
+        } else {
+          resObj[res] = this.summation(resObj[res].split('/'), units).toString()
+          }
+        }
+      }
+      this.tables.push(resObj)
+    },
+
+    /**
+     * 求和函数
+     * summation
+     * arr:数据集合
+     * units:币种集合
+     */
+    summation(arr,units){
+      if(Array.isArray(arr)){
+          var arrSum = 0
+          for(var i=0;i<arr.length;i++){
+            if(!isNaN(arr[i])) {
+              arrSum += +arr[i]
+            }
+          }
+          return arrSum.toFixed(2) + units
+      }
+    },
+
+    /**
+     * 数据深拷贝
+     * deepClone
+     * obj:需要克隆的source
+     */
+    deepClone(obj) {
+    let newObj = Array.isArray(obj) ? [] : {}
+    if (obj && typeof obj === "object") {
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                newObj[key] = (obj && typeof obj[key] === 'object') ? this.deepClone(obj[key]) : obj[key];
+            }
+        }
+    } 
+        return newObj
+    },
+
+    /**
+     * 横向总和计算
+     * getParams
+     * item:接收数据
+     */
+    getParams(item) {
+      const temples = [];
+      let totals = 0;
+      let reg = /[\u4e00-\u9fa5]/g;
+      Object.keys(item).forEach(function(key) {
+        if (!isNaN(parseFloat(item[key]))) {
+          temples.push((item[key]))
+        }
+      })
+      
+      let currency = '';
+      for (let i = temples.length - 1; i >= 0; i--) {
+        totals += parseFloat(temples[i])
+        currency = temples[i].match(reg).join("")
+      }
+      return totals.toFixed(2) + '\xa0' + currency;
+    },
+
+    /**
+     * 表格合并行函数
+     * objectSpanMethod
+     * row:当前行
+     * column:当前列
+     * rowIndex:当前行号
+     * columnIndex:当前列号
+     */
+    objectSpanMethod({ row, column, rowIndex, columnIndex }) {
+      let sameVessel = []
+      sameVessel = this.tables.filter(item=> {
+        return item.vessel === row.vessel
+      })
+
+      // 需要拿到 相同数据的第一个行号值
+      const rowKeyFirst = this.tables.map(o=>o.vessel).indexOf(row.vessel);
+      // 需要知道，相同行内的 哪一列需要合并
+      if (rowIndex === rowKeyFirst) {
+        if (columnIndex === 0) {
+          return [sameVessel.length, 1]
+        }
+      }
+       else if (rowIndex === rowIndex && columnIndex === 0) {
+        return [0, 0]
+      }
+    }
+  },
+}
+</script>
