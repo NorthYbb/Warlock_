@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>本地数据版本</title>
+</head>
+<body>
+	<template>
+<div>localhost</div>
+</template>
+<script>
+export default {
+  name: 'HelloWorld',
+  data () {
+    return {
+      list: [
+        {
+          vessel: '航海一號',
+          cash_a: '100人民币',
+          cash_b: '--',
+          cash_e: '100港币',
+        },
+        {
+          vessel: '航海一號',
+          cash_a: '--',
+          cash_b: '20美金',
+          cash_e: '100港币',
+        },
+        {
+          vessel: '航海二號',
+          cash_a: '50人民币',
+          cash_b: '--',
+          cash_e: '100港币',
+        },
+        {
+          vessel: '航海二號',
+          cash_a: '500美金',
+          cash_b: '20美金',
+          cash_e: '100港币',
+        },
+        {
+          vessel: '航海二號',
+          cash_a: '50000美金',
+          cash_b: '920美金',
+          cash_e: '100港币',
+        }
+      ],
+      curys: ['人民币','美金','港币']
+    }
+  },
+  created: function () {
+    this.curys.forEach(item => {
+      this.test(this.list, item)
+    })
+
+    console.log('22', this.list)
+  },
+  methods: {
+    deepClone(obj) {
+    let newObj = Array.isArray(obj) ? [] : {}
+    if (obj && typeof obj === "object") {
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                newObj[key] = (obj && typeof obj[key] === 'object') ? this.deepClone(obj[key]) : obj[key];
+            }
+        }
+    } 
+        return newObj
+    },
+
+    test(ary, units) {
+      let newList = this.deepClone(this.list)
+      let test_reg = /^[\u4e00-\u9fa5]*$/
+
+      for(let obj of newList) {
+        let keys = Object.keys(obj)
+        for(let key of keys) {
+          if(!test_reg.test(obj[key]) && !obj[key].includes(units)){
+            obj[key] = '0'
+          }
+        }
+      }
+
+      let temArray = []
+      for (let obj of newList) {
+        temArray = temArray.concat(Object.keys(obj))
+      }
+
+      let tmpSet = new Set(temArray)
+    
+      let resObj = {}
+      tmpSet.forEach(key => {
+        resObj[key] = '0'
+      })
+
+      for (let obj of newList) {
+        tmpSet.forEach(key => {
+          if(obj[key] !== '0') {
+            if(!test_reg.test(obj[key])){
+            let temKey = parseInt(obj[key])
+              resObj[key] = resObj[key] + '/' + temKey
+            } else {
+              resObj[key] = '合计'
+            }
+          }
+        })
+      }
+
+      for(let res in resObj) {
+        if(!test_reg.test(resObj[res])) {
+        if(this.sum(resObj[res].split('/'), units).toString().substring(0, 1) === '0') {
+          resObj[res] = '--'
+        } else {
+          resObj[res] = this.sum(resObj[res].split('/'), units).toString()
+          }
+        }
+      }
+      this.list.push(resObj)
+    },
+        sum(arr,units){
+        if(Array.isArray(arr)){
+            var arrSum = 0
+            for(var i=0;i<arr.length;i++){
+                arrSum += +arr[i]
+            }
+            return arrSum + units
+        }
+     },
+  }
+}
+</script>
+</body>
+</html>
