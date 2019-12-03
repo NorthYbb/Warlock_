@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Sporadic records</title>
+</head>
+<body>
+	属性名可计算:属性名可以传入变量或者常量，而不只是一个固定的字符串。
+	const id = 5
+    const obj = {
+      [`my-${id}`]: id
+    }
+    console.log(obj['my-5']) // 5
+    
+
+	Object.is() 用来解决JavaScript中特殊类型 == 或者 === 异常的情况。
+	 //实际出现了异常(错误输出)
+    console.log(NaN === NaN) // false
+    console.log(+0 === -0) // true
+    console.log(5 == "5") //true
+    
+    //我们期望的目标输出(正确输出)
+    console.log(NaN === NaN) // true
+    console.log(+0 === -0) // false
+    console.log(5 == "5") //false
+
+	为了解决历遗留问题，新增了Object.is()来处理2个值的比较。
+	console.log(Object.is(NaN, NaN)) // true
+    console.log(Object.is(+0, -0)) // false
+    console.log(Object.is(5, "5")) //false
+
+
+	let arr = [1, 2, 3, 4];
+    let [...a] = arr;
+    测试过，可以是obj对象
+    let [...a] 就已经等于定义了变量 a 并赋值
+    console.log(a) //[1,2,3,4] 这种做法就是克隆arr数组
+</body>
+</html>
