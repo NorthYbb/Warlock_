@@ -1,0 +1,618 @@
+<!-- 年度修理计划详情-新增 2019-11-28-->
+<template>
+  <div v-loading="listLoading">
+    <div class="annuals">
+      <!-- 按钮组件auditFlow，接口OK 后追加 -->
+      <!-- <auditFlow v-show="billInfo.settlementNo" style="margin-left:20px;" show-history-flag="true" :activities="activities"
+            :bill-no="$t('shipRepairManagement.statementOrderNo') + $t('common.colon') + billInfo.settlementNo"
+            :status="$t('common.status') + $t('common.colon') + appFlag" /> -->
+    </div>
+    <div class="small-button-container">
+    <!-- 审核通过 -->
+      <ws-button type="primary" @click="dialogApprove = true">{{ $t('button.approve') }}</ws-button>
+    <!-- 退回 -->
+      <ws-button @click="dialogDiscard = true">{{ $t('button.noapprove') }}</ws-button>
+    <!-- 导出 -->
+      <ws-button>{{ $t('button.export') }}</ws-button>
+    <!-- 返回 -->
+      <ws-button type="back">{{ $t('button.back') }}</ws-button>
+    </div>
+    <div class="app-container apply-container">
+      <div class="input-main crt-main">
+        <!-- 基本信息 -->
+        <div class="input-form">
+          <ws-form :show-message="false" :model="essential">
+            <div class="label-box" style="margin:20px 0px">
+              <span class="label-title">{{ $t('common.basicInfo') }}</span>
+              <div class="divIcon" @click="openState(openMsg[0].key)">
+                <svg-icon class="openCloseIcon" v-show="openMsg[0].state" icon-class="open" />
+                <svg-icon class="openCloseIcon" v-show="!openMsg[0].state" icon-class="close" />
+                <span class="openClose">{{ $t(openMsg[0].value) }}</span>
+              </div>
+            </div>
+            <!-- form 信息 -->
+            <transition name="draw">
+              <div v-show="openMsg[0].state" class="crewMsg">
+                <ws-info-table>
+                  <!-- 计划年份 -->
+                  <ws-form-item :label="$t('shipRepairManagement.annualRepair.particularYear')">
+                    {{'2020'}}
+                  </ws-form-item>
+                  <!-- 做成人 -->
+                  <ws-form-item :label="$t('shipRepairManagement.annualRepair.adult')">
+                    {{'米希尔'}}
+                  </ws-form-item>
+                  <!-- 做成日期 -->
+                  <ws-form-item :label="$t('shipRepairManagement.annualRepair.makeTime')">
+                    {{'2020-01-01'}}
+                  </ws-form-item>
+                  <ws-form-item />
+                  <!-- 备注 -->
+                  <ws-form-item :label="$t('common.remark')" span="2">
+                    {{'撒坦克莱尔德'}}
+                  </ws-form-item>
+                </ws-info-table>
+              </div>
+            </transition>
+          </ws-form>
+          <div class="label-box labelBox">
+            <span class="label-title">{{ $t('shipRepairManagement.annualRepair.plannedShip') }}</span>
+          </div>
+          // 子组件
+         <annualRepairShip :gether='gather'/>
+         // 子组件结束
+          <ws-form ref="gather" :model="gather">
+          <template>
+            <ws-normal-table
+              border
+              :data="gather.estimate"
+              style="width: 100%">
+              <!-- 序号 -->
+              <ws-table-column
+                align="center"
+                :label="$t('common.num')"
+                width="50">
+                <template slot-scope="scope">
+                  <span>{{ scope.$index + 1 }}</span>
+                </template>
+              </ws-table-column>
+              <!-- 船舶名称 -->
+              <ws-table-column
+                align="center"
+                prop="estimateVessel"
+                :label="$t('shipRepairManagement.annualRepair.vesselName')"
+                width="180">
+                <template slot-scope="scope">
+                <ws-form-item
+                  style="margin-top:5px"
+                  :prop="'estimate.' + scope.$index + '.estimateVessel'">
+                  {{'estimateVessel'}}
+                </ws-form-item>
+                </template>
+              </ws-table-column>
+              <!-- 修理类别 -->
+              <ws-table-column
+                align="center"
+                prop="estimateCategory"
+                :label="$t('shipRepairManagement.annualRepair.category')"
+                width="180">
+                <template slot-scope="scope">
+                <ws-form-item
+                  style="margin-top:5px"
+                  :prop="'estimate.' + scope.$index + '.estimateCategory'">
+                  {{'estimateCategory'}}
+                </ws-form-item>
+                </template>
+              </ws-table-column>
+              <!-- 预计修理天数 -->
+              <ws-table-column
+                align="center"
+                prop="estimateRepairDay"
+                :label="$t('shipRepairManagement.annualRepair.repairDay')"
+                width="150">
+                <template slot-scope="scope">
+                <ws-form-item
+                  style="margin-top:5px"
+                  :prop="'estimate.' + scope.$index + '.estimateRepairDay'">
+                  {{'estimateRepairDay'}}
+                </ws-form-item>
+                </template>
+              </ws-table-column>
+              <!-- 预计修理月份 -->
+              <ws-table-column align="center" :label="$t('shipRepairManagement.annualRepair.repairMonth')">
+                <!-- 一月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Jan')"
+                  prop="Jan"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Jan" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 二月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Feb')"
+                  prop="Feb"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Feb" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 三月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Mar')"
+                  prop="Mar"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Mar" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 四月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Apr')"
+                  prop="Apr"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Apr" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 五月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.May')"
+                  prop="May"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.May" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 六月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Jun')"
+                  prop="Jun"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Jun" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 七月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Jul')"
+                  prop="Jul"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Jul" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 八月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Aug')"
+                  prop="Aug"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Aug" disabled/>
+                    </ws-checkbox-group>
+                    </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 九月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Sep')"
+                  prop="Sep"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Sep" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 十月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Oct')"
+                  prop="Oct"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Oct" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 十一月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Nov')"
+                  prop="Nov"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Nov" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+                <!-- 十二月 -->
+                <ws-table-column
+                  align="center"
+                  :label="$t('shipRepairManagement.annualRepair.Dec')"
+                  prop="Dec"
+                  width="65">
+                  <template slot-scope="scope">
+                  <ws-form-item
+                    :prop="'estimate.' + scope.$index + '.checkedMonth'">
+                    <ws-checkbox-group v-model="scope.row.checkedMonth">
+                      <ws-checkbox :label="scope.row.Dec" disabled/>
+                    </ws-checkbox-group>
+                  </ws-form-item>
+                  </template>
+                </ws-table-column>
+              </ws-table-column>
+              <!-- 备注 -->
+              <ws-table-column
+                align="center"
+                prop="remark"
+                :label="$t('shipRepairManagement.annualRepair.remark')"
+                width="320">
+                <ws-form-item style="margin-top:5px">
+                  {{'remark'}}
+                </ws-form-item>
+              </ws-table-column>
+            </ws-normal-table>
+          </template>
+          </ws-form>
+        <!-- 附件 -->
+          <div class="label-box labelBox">
+            <span class="label-title">{{ $t('annualTraining.enclosure') }}</span>
+            <!-- <ws-upload
+              ref="upload"
+              class="uploadDiv"
+              table-name="repair_voyage_settlement_info"
+              oss-key="annualRepairDetail"
+              :editable="false"
+              :comp-id="compId" :vessel-id="billInfo.vesselId" :appendix-ids="billInfo.appendixFlag"
+              /> -->
+          </div>
+            <!-- 退回dialog-->
+          <ws-dialog width="45%" :title="$t('button.noapprove')" :before-close="dialogDiscardCancel" :visible.sync="dialogDiscard" :modal="true" :close-on-click-modal="false" v-loading="discardLoading">
+            <div class="input-form" style="min-height: 200px;">
+              <ws-form ref="discards" :model="discards" :rules="verification">
+                <ws-info-table style="border: none !important;">
+                  <!-- 退回原因 -->
+                    <ws-form-item prop="backReason" :span="4" class="three-row first" style="border: none !important;">
+                      <div class="discardTitle">
+                        <div class="discardIcon">*</div>
+                        <div class="abandon">{{ $t('common.returnReason') }}</div>
+                      </div>
+                      <div class="discardInput">
+                        <ws-input type="textarea" v-model.trim="discards.backReason" maxlength="200" :rows="5">
+                        </ws-input>
+                      </div>
+                    </ws-form-item>
+                </ws-info-table>
+              </ws-form>
+            </div>
+            <div slot="footer" class="dialog-footer">
+              <ws-button @click="dialogDiscardCancel">{{ $t('button.cancel') }}</ws-button>
+              <ws-button type="primary" @click="discardConfirm">{{ $t('button.confirm') }}</ws-button>
+            </div>
+          </ws-dialog>
+        <!-- 审核通过dialog-->
+          <ws-dialog width="45%" :title="$t('deploy.review')" :before-close="approveCancel" :visible.sync="dialogApprove" :modal="true" :close-on-click-modal="false" v-loading="approveLoading">
+            <div class="input-form" style="min-height: 200px;">
+              <ws-form ref="discards" :model="discards">
+                <ws-info-table style="border: none !important;">
+                    <ws-form-item prop="approveReason" :span="4" class="three-row first" style="border: none !important;">
+                      <div class="discardTitle">
+                        <div class="abandon">{{ $t('shipRepairManagement.requisition.checkReason') }}</div>
+                      </div>
+                      <div class="discardInput">
+                        <ws-input
+                        type="textarea"
+                        v-model.trim="discards.approveReason"
+                        maxlength="200"
+                        :rows="5">
+                        </ws-input>
+                      </div>
+                    </ws-form-item>
+                </ws-info-table>
+              </ws-form>
+            </div>
+            <div slot="footer" class="dialog-footer">
+              <ws-button @click="approveCancel">{{ $t('button.cancel') }}</ws-button>
+              <ws-button type="primary" @click="approveConfirm">{{ $t('button.confirm') }}</ws-button>
+            </div>
+          </ws-dialog>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { vesselListByCompId } from '@/api/basicData/basicData'
+import annualRepairShip from '@/views/shipRepairManagement/annualRepairPlan/annualRepairShip'
+import upload from '@/components/Upload/upload'
+import WsUpload from '@/components/WsUpload'
+
+export default {
+  name: 'annualRepairDetail',
+  components: { annualRepairShip },
+  data() {
+    return {
+      listLoading: false,
+      activities: [], // 操作历史
+      openMsg: [
+        { key: 0, value: 'shipInformation.retract', state: true },
+      ],
+      // 基本信息数据
+      essential: {
+        particularYear: '2019-11-28',
+        adult: '大管轮  张三',
+        makeTime: '2019-11-28',
+        remark: '',
+      },
+      verification: {
+        backReason: [{ required: true, trigger: 'change' }]
+      },
+      gather: {
+        estimate: [
+          {
+            estimateVessel: '',
+            estimateCategory: '',
+            estimateRepairDay: '',
+            Jan: '一月',
+            Feb: '二月',
+            Mar: '三月',
+            Apr: '四月',
+            May: '五月',
+            Jun: '六月',
+            Jul: '七月',
+            Aug: '八月',
+            Sep: '九月',
+            Oct: '十月',
+            Nov: '十一月',
+            Dec: '十二月',
+            checkedMonth: ['六月', '十二月'],
+            remark: '',
+            operate:'',
+          }
+        ],
+      },
+      shipList: [],
+      discards: {
+        backReason: '',
+        approveReason: ''
+      },
+      dialogDiscard: false, // 退回弹窗
+      discardLoading: false,
+      dialogApprove: false, // 审核通过弹窗
+      approveLoading: false
+    }
+  },
+  created() {
+    this.initialization();
+  },
+  methods: {
+    /**
+     * 初始化函数执行
+     */
+    initialization() {
+      // this.listLoading = true;
+      /**
+       * 船舶名称 vesselListByCompId
+       */
+      vesselListByCompId().then(response => {
+        // response.data.unshift({ vesselId: '', vesselName: '全部船舶' });
+        this.shipList = response.data;
+      });
+    },
+
+    /**
+     * 基本信息_展开和收起 openState
+     * key:索引值
+     */
+    openState(key) {
+      this.openMsg[key].state = !this.openMsg[key].state;
+      if (this.openMsg[key].state) {
+        this.openMsg[key].value = 'shipInformation.retract';
+      } else {
+        this.openMsg[key].value = 'shipInformation.Open';
+      }
+    },
+
+    /**
+     *  年终修理计划退出弹窗
+     */
+    dialogDiscardCancel() {
+      this.dialogDiscard = false;
+      this.discards.backReason = '';
+      this.$nextTick(() => {
+        this.$refs['discards'].clearValidate()
+      })
+    },
+    
+    discardConfirm() {
+      this.dialogDiscard = true;
+      this.$refs.discards.validate((valid) => {
+        if (valid) {
+          // 执行废弃接口
+          this.dialogDiscard = false;
+        } else {
+          this.$message({
+            message: this.$t('cw.payee.asteriskRequired'),
+            type: 'error'
+          })
+          return false;
+        }
+      });
+    },
+
+    /**
+     * 年终修理计划审核弹窗
+     */
+    approveCancel() {
+      this.dialogApprove = false;
+      this.discards.approveReason = '';
+      this.$nextTick(() => {
+        this.$refs['discards'].clearValidate()
+      })
+    },
+    approveConfirm() {
+      this.dialogApprove = true;
+      this.$refs.discards.validate((valid) => {
+        if (valid) {
+          // 执行废弃接口
+          this.dialogApprove = false;
+        } else {
+          this.$message({
+            message: this.$t('cw.payee.asteriskRequired'),
+            type: 'error'
+          })
+          return false;
+        }
+      });
+    },
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+  .groupTitle {
+    margin-right: 8px;text-align: right;width: 100%;color: black;font-size: 14px;
+  }
+  .groupName {
+    line-height:40px;display:inline-block;
+  }
+  .trainingManagement_dropDown_error {
+    border: 1px solid;
+    border-color: #ff4949 !important;
+  }
+  .annuals{
+    position: absolute;
+    left: 30px;
+    z-index: 10;
+    height: 50px;
+    line-height: 50px;
+    font-size: 14px;
+    font-weight: normal;
+    color: #333;
+  }
+  .type {
+    font-size: 16px;
+  }
+  .labelBox {
+    margin-top:30px;
+    margin-bottom:15px
+  }
+  .uploadDiv {
+    margin-top: 15px;
+  }
+  .operate {
+    display: inline-block;
+    width: 30px;
+    cursor: pointer;
+  }
+  /deep/ .apply-container {
+    .label-box {
+      .label-title {
+        display: inline;
+      }
+      .divIcon {
+        float: right;
+        cursor: pointer;
+      }
+    }
+  }
+    /deep/ .el-table td{
+      border-left: 1px solid #cccccc !important;
+      border-bottom: 1px solid #cccccc !important;
+    }
+    /deep/ .el-table thead.is-group th {
+      font-weight: normal;
+      border-left: 1px solid #cccccc !important;
+      border-bottom: 1px solid #cccccc !important;
+    }
+    /deep/ .el-checkbox-group .el-checkbox__label {
+      display: none;
+    }
+    /deep/ .el-checkbox {
+      margin-top: 5px;
+    }
+
+  // 退回dialog_css
+  .discardTitle {
+    display: block;
+    width: 15%;
+    margin-top: -80px;
+  }
+  .discardIcon {
+    display: inline-block;
+    width: 9%;
+    color:red;
+  }
+  .abandon {
+    display: initial;
+    width: 85%;
+    margin-left:5px;
+  }
+  .discardInput {
+    display: block;
+    width:85%;
+    margin-left:5px;
+    margin-right:5px;
+  }
+</style>
