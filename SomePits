@@ -1,0 +1,3 @@
+// 有时候想对已有对象上添加一些属性，但是有时候添加到对象上的属性并不会被触发更新，在这种情况下，可以创建一个新的对象，让它包含原有对象的属性和新的属性。
+// Object.assign(this.someObject, {a: 1, b: 2})
+替代上面：this.someObject = Object.assign({}, this.someObject, {a: 1, b: 2})
