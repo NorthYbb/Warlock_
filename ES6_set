@@ -64,3 +64,16 @@ for (let x of myArr) {
 // 1
 // 2
 // 3
+————————————————
+Array.from(s); //转为数组
+————————————————
+5、差值
+let a = new Set( [ 1, 2, 3 ] );
+let b = new Set( [ 2, 5, 8 ] );
+并集:
+    new Set( [...a, ...b ] );
+交集:
+    new Set( [...a].filter( x => b.has( x ) ) );
+差集:
+    new Set( [...a].filter( x => !b.has( x ) ) ); // a数组中的值，不存在b数组中的值
+————————————————
