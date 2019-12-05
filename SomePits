@@ -1,3 +1,31 @@
 // 有时候想对已有对象上添加一些属性，但是有时候添加到对象上的属性并不会被触发更新，在这种情况下，可以创建一个新的对象，让它包含原有对象的属性和新的属性。
 // Object.assign(this.someObject, {a: 1, b: 2})
 替代上面：this.someObject = Object.assign({}, this.someObject, {a: 1, b: 2})
+
+1 this属性调用无效
+this在methods中的方法表面调用,表明调用的是当前vue对象.
+但在方法内部的方法中调用时,所指便不再是vue对象,可能式窗口本身.
+此时建议,在methods中的方法开始时写:
+let that = this;
+//或者let self = this;
+
+子组件内部接收父组件传过来的值
+props:{
+            itemLists:{
+                type:Array,
+                required:true,
+            }
+        }
+props验证，定义接收值的类型，并且用对象的形式
+        传值的类型：变量、方法【不可加括号】、【父组件的this即父组件整个实例】
+如果父组件向子组件中传递的是动态变化的值，那又当如何？
+     当然是在问题3的基础上了。假设子组件收到的值是字符串tabView：
+props：{
+            tabView：String,
+        }
+那么此时，我们需要在子组件中对接收到的动态变量tabView进行监听，即：
+watch:{
+            tabView(newVal,oldVal){  //注意，函数名是要监听的变量名
+                this.tabView=newVal;
+            }
+        }
