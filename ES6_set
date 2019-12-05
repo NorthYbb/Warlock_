@@ -22,38 +22,31 @@ console.log(s);//{10, 20}
 console.log(s.has(20)); //rue 判断有没有某个成员
 s.clear(); //清空整个s
 console.log(s);//{}
-
-————————————————
-版权声明：本文为CSDN博主「sayid760」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
-原文链接：https://blog.csdn.net/qq_14993375/article/details/79753454
 ————————————————
 3、Set 结构的实例有四个遍历方法，可以用于遍历成员。
 keys()：返回键名的遍历器
 values()：返回键值的遍历器
 entries()：返回键值对的遍历器
 
-let set = new Set([a:'1',b: '2', c:'3']);
+//查看键、值、键值对		
+var set=new Set(["a","b","aaa"]);
 
-for (let item of set.keys()) {
-  console.log(item);
+for(let key of set.keys()){
+	console.log(key);//a b aaa
 }
-// 1
-// 2
-// 3
-
-for (let item of set.values()) {
-  console.log(item);
+ 
+var set=new Set(["a","b","aaa"]);
+for(let key of set.values()){
+	console.log(key);//a b aaa
 }
-// 1
-// 2
-// 3
-
-for (let item of set.entries()) {
-  console.log(item);
+ 
+var set=new Set(["a","b","aaa"]);
+for(let key of set.entries()){ //键值对
+	console.log(key);//["a", "a"] ["b", "b"] ["aaa", "aaa"]
 }
-// ["1", "1"]
-// ["2", "2"]
-// ["3", "3"]
+set.forEach((val,key)=>{
+	console.log(val,key); //a a      b b    aaa aaa
+})
 ————————————————
 4、for … of…
 let myArr= new Set(['1', '2', '3']);
