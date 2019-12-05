@@ -12,6 +12,20 @@ add(value)：添加某个值，返回 Set 结构本身。
 delete(value)：删除某个值，返回一个布尔值，表示删除是否成功。
 has(value)：返回一个布尔值，表示该值是否为Set的成员。
 clear()：清除所有成员，没有返回值。
+
+//添加值、删除值、判断成员、清空
+var s=new Set();
+s.add(10).add(20).add(30).add(30)
+console.log(s);//{10, 20, 30}
+s.delete(30);
+console.log(s);//{10, 20}
+console.log(s.has(20)); //rue 判断有没有某个成员
+s.clear(); //清空整个s
+console.log(s);//{}
+
+————————————————
+版权声明：本文为CSDN博主「sayid760」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/qq_14993375/article/details/79753454
 ————————————————
 3、Set 结构的实例有四个遍历方法，可以用于遍历成员。
 keys()：返回键名的遍历器
