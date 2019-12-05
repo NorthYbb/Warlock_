@@ -19,7 +19,7 @@ s.add(10).add(20).add(30).add(30)
 console.log(s);//{10, 20, 30}
 s.delete(30);
 console.log(s);//{10, 20}
-console.log(s.has(20)); //rue 判断有没有某个成员
+console.log(s.has(20)); //true 判断有没有某个成员
 s.clear(); //清空整个s
 console.log(s);//{}
 ————————————————
@@ -41,7 +41,7 @@ for(let key of set.values()){
 }
  
 var set=new Set(["a","b","aaa"]);
-for(let key of set.entries()){ //键值对
+for(let key of set.entries()){ // 键值对
 	console.log(key);//["a", "a"] ["b", "b"] ["aaa", "aaa"]
 }
 set.forEach((val,key)=>{
