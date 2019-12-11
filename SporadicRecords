@@ -170,6 +170,11 @@ function isObjectValueEqual(a, b) {
 	}
 	我们只需要对 authors 这个数据结构增加 Iterator 遍历器接口即可用 for…of 的方式来遍历了，浏览器不再报错了。
 
+for (const author of authors) {
+  console.log(author);
+}
+console.log(...authors)
+
 
 </body>
 </html>
