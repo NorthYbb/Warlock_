@@ -175,6 +175,74 @@ for (const author of authors) {
 }
 console.log(...authors)
 
+___________________
+___________________________
+
+Array.from 方法用于将两类对象转为真正的数组
+这个方法不错，拆解后台数据的时候很好用
+
+let arrayLike = {'0': 'a','1': 'b','2': 'c',length: 3};
+Array.from(arrayLike, (v, k) => v); // ["a", "b", "c"]
+Array.from(arrayLike, (v, k) => k); // [0, 1, 2]
+
+
+求一个list里所有值的和
+
+命令式编程：
+var numbers = [1,2,3,4,5]
+var total = 0 for(var i = 0; i < numbers.length; i++) {
+  	total += numbers[i]
+}
+console.log (total) //=> 15
+
+声明式编程：
+var numbers = [1,2,3,4,5]
+var total = numbers.reduce (function (sum, n) {
+  	return sum + n
+});
+console.log (total) //=> 15
+
+点击空白处关闭弹窗几种方法
+	vue.js 写法（写在mounted里面）
+
+	document.addEventListener('mouseup',(e) =>{
+	var _con = document.getElementById('more-oprate')
+	if(_con) {
+		if(!_con.contains(e.target)) {
+			this.isShowBtn = ''
+        }
+    }
+})
+
+时间的函数：var d=new Date();
+                d.getHours();//获取当前时间
+                d.getDay();//获取星期几      
+                      
+————————————————
+
+1.location.href;//返回URL
+  location.hostname;//返回web主机域名
+  location.pathname;//返回当前页面的路径和文件名
+  location.port;//返回web主机的端口
+  location.protocol;//返回使用的web协议
+     注意：不能使用window这个前缀。
+     
+2.history.back();//返回上一个地址
+  history.forward();//返回下一个地址
+  
+3.navigator.attribute;//返回当前浏览器的信息 
+
+
+4.弹窗alert();//提示
+confirm("sometext");//警告
+prompt("sometext","默认");//输入数据并继续
+
+
+5.setInterval(function(){},时间);//间隔相同的时间执行相同的代码，1000ms为1秒
+  clearInterval(a);//停止
+  setTimeOut(function(){},时间);//设置方法执行的时间
+  clearTimeOut(a);//停止，你必须在它设置的时间之前阻止它
+————————————————
 
 </body>
 </html>
