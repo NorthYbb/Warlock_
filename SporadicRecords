@@ -112,6 +112,50 @@ function isObjectValueEqual(a, b) {
 	Reflect.ownKeys({z: 3, y: 2, x: 1}); // [ "z", "y", "x" ]
 	Reflect.ownKeys([]); // ["length"]
 
+	__________________________
+	_______________________________________
+	let authors = {
+	  allAuthors: {
+	    fiction: [
+	      'Agatha Christie',
+	      'J. K. Rowling',
+	      'Dr. Seuss'
+	    ],
+	    scienceFiction: [
+	      'Neal Stephenson',
+	      'Arthur Clarke',
+	      'Isaac Asimov',
+	      'Robert Heinlein'
+	    ],
+	    fantasy: [
+	      'J. R. R. Tolkien',
+	      'J. K. Rowling',
+	      'Terry Pratchett'
+	    ]
+	  }
+	}
+	我们希望可以对 authors 进行遍历并得到所有作者的名单。
+	ES6 增加了 Iterator 让任意数据结构可以实现自定义遍历器。直接上代码：
+	authors[Symbol.iterator] = function () {
+	  let allAuthors = this.allAuthors
+	  let keys = Reflect.ownKeys(allAuthors)
+	  let values = []
+	  return {
+	    next () {
+	      if (!values.length) {
+		if (keys.length) {
+		  values = allAuthors[keys[0]]
+		  keys.shift()
+		}
+	      }
+	      return {
+		done: !values.length,
+		value: values.shift()
+	      }
+	    }
+	  }
+	}
+	我们只需要对 authors 这个数据结构增加 Iterator 遍历器接口即可用 for…of 的方式来遍历了，浏览器不再报错了。
 
 
 </body>
