@@ -29,3 +29,37 @@ watch:{
                 this.tabView=newVal;
             }
         }
+
+
+  data() {
+    return {
+      initialLoading: false,
+      dateFilters: [],
+      calculateDate: {
+        startDate: '',
+        endDate: ''
+      },
+      tables: [],
+      headers: [{
+        dataItem: 'vessel',
+        shipyardName: '船舶'
+      }],
+      resultShips: [],
+      remittances: [],
+      change_number: 0
+    }
+  },
+  watch: {
+    calculateDate: {
+      handler(curVal){
+        if(curVal.startDate === '' && curVal.endDate === '') {
+          this.dateFilters = []
+          this.initialization();
+        }
+　　　},
+      // 页面加载之初先执行一次handle
+      // immediate: true,
+      // 深度检查属性,即使对象内部的属性值改变, 也能检测到(比较消耗性能)
+      deep: true
+    },
+  },
