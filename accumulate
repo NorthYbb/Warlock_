@@ -1,0 +1,41 @@
+Vue_knowledge
+
+Vue 学习
+<!-- type为checkbox多选的时候，box为数组集合[] -->
+<input v-model="box" type="checkbox" value="apple" />
+<input v-model="box" type="checkbox" value="banana" />
+<input v-model="box" type="checkbox" value="orange" />
+
+<!-- type为radio的时候，box为所选择的value值 -->
+<input v-model="box" type="radio" value="orange" />
+
+
+延迟修改器.lazy
+v-model.lazy
+数值修改器.number
+v-model.number
+空格裁剪.tirm
+v-model.trim
+
+
+计算属性
+computed: {
+	一个函数，return一个值
+}
+
+属性监听 vueJs中的变量
+watch:{
+<!-- myVal 就是被监听的变量 -->
+	myVal: function(val, oldVal) {
+		<!-- 是个函数 新值 和 旧值-->
+	}
+	<!-- 被监听的变量发生变化，就会被更新该变量 -->
+}
+
+深入 vue 组件
+
+组件的渲染：可以直接引用<com-a></com-a>
+			也可以使用is形式动态添加<p is="com-a"></p>
+	在data中定义一个变量：temp： "com-a" // 赋值子组件
+	<p :is="temp"></p>
+	这样就可以在变量temp值改变为其他组件时候，加载不同组件
