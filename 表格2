@@ -1,0 +1,481 @@
+<!--
+ * @Descripttion: 
+ * @Author: _Shiyuan.Liu
+ * @Date: 2020-05-16 09:10:02
+ * @LastEditors: _Shiyuan.Liu
+ * @LastEditTime: 2020-05-22 09:46:18
+--> 
+<template>
+  <div class="cont-main m-10">
+    <div class="left-button-container">
+      <div class="nav-search">
+        <!-- 船东名称下拉筛选 -->
+        <div class="searchOne">
+          <ws-select v-model="shipOwnerId" multiple collapse-tags :placeholder="$t('businessManagement.statistics.shipowner')" @change="handleCompCommand">
+            <ws-option v-for="item in shipownerList" :key="item.compId" :label="item.compName" :value="item.compId"></ws-option>
+          </ws-select>
+        </div>
+        <!-- 船舶名称下拉筛选 -->
+        <div class="searchOne" style="margin-left:10px">
+          <ws-dropdown trigger="click" class="dropdown" @command="handleCommand">
+            <span class="el-dropdown-link">
+              {{ $t(allShipName) }}
+              <svg-icon class="dropDown" icon-class="dropDown"/>
+            </span>
+            <ws-dropdown-menu slot="dropdown">
+              <ws-dropdown-item v-for="(item,value) in shipList" :key="value" :command="item.vesselId">
+                {{ $t(item.vesselName) }}
+              </ws-dropdown-item>
+            </ws-dropdown-menu>
+          </ws-dropdown>
+        </div>
+        <!-- 条件过滤筛选 -->
+        <div class="searchTwo">
+          <span class="vertical-line">|</span>
+          <ws-button type="text" @click="dialogFilter = true">
+            <svg-icon class="filter" icon-class="filter" />
+            <span>{{$t('common.filter')}}</span>
+          </ws-button>
+          <span class="filter-total">{{$t('common.total')}}{{ total }}{{$t('common.result')}}</span>
+          <ws-dialog class="dialog" :title="$t('common.filter')" :visible.sync="dialogFilter" :modal="false">
+            <span>
+              <!-- 租约类型 -->
+              <div class="select">
+                <div class="selectTitle">
+                  <span>{{ $t('common.status') }}{{ $t('common.colon') }}</span>
+                </div>
+                <ws-select :placeholder="$t('common.selected')"  v-model="page.tradeType" clearable>
+                  <ws-option v-for="item in typeList " :key="item.value" :label="item.value" :value="item.value"/>
+                </ws-select>
+              </div>
+            </span>
+            <span slot="footer" class="dialog-footer">
+              <div class="elButton">
+                <ws-button @click="resetSearch">{{$t('common.reset')}}</ws-button>
+                <ws-button type="primary" @click="handleConditionSearch">{{$t('common.filter')}}</ws-button>
+              </div>
+            </span>
+          </ws-dialog>
+        </div>
+        <!-- 关键字模糊搜索 -->
+        <div class="searchThree">
+          <ws-input v-model="page.searchKeyword" maxlength="50"
+            :placeholder="$t('businessManagement.statistics.tips')"
+            @clear="resetSearchKeyword" @keyup.enter.native="handleConditionSearch"
+          />
+          <svg-icon icon-class="searchIcon" class="searchIcon" @click="handleConditionSearch" />
+        </div>
+      </div>
+    </div>
+
+    <ws-normal-table :data="tableData" :span-method="objectSpanMethod" border :header-cell-style="{'text-align':'center'}">
+      <!-- 序号 -->
+      <el-table-column type="index" align="center" width="50" :label="$t('commonNewest.num')" :show-overflow-tooltip="false" fixed/>
+      <!-- 船名 -->
+      <el-table-column prop="vesselName" align="center" min-width="120" :label="$t('crew.service.shipName')" fixed/>
+      <!-- 合同编号 -->
+      <el-table-column prop="contractNo" align="center" min-width="120" :label="$t('deploy.contractNo')" fixed/>
+      <!-- 租约类型 -->
+      <el-table-column prop="tradeType" align="center" min-width="100" :label="$t('businessManagement.businessRental.leaseType')" fixed/>
+      <!-- 航次   可更加 航次号相同来 设定feeType 的值 航次号相同的 feeType值相同--> 
+      <el-table-column prop="voyNo" align="center" min-width="100" :label="$t('wb.inspection.voyageNumber')" fixed/>
+      <!-- 交船港 -->
+      <el-table-column prop="deliveryPort" align="center" min-width="150" :label="$t('businessManagement.businessRental.portOfDelivery')">
+        <template slot-scope="scope">
+          <span :title="scope.row.deliveryPort">
+            {{ scope.row.deliveryPort | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 交船/航次开始时间（GMT） -->
+      <el-table-column prop="startDate" align="center" min-width="150" :label="$t('businessManagement.businessRental.voyageGMT')">
+        <template slot-scope="scope">
+          <span :title="scope.row.startDate">
+            {{ scope.row.startDate | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 装港 -->
+      <el-table-column prop="loadingPart" align="center" min-width="150" :label="$t('cg.chartRepair.loading')">
+        <template slot-scope="scope">
+          <span :title="scope.row.loadingPart">
+            {{ scope.row.loadingPart | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 卸港 -->
+      <el-table-column prop="dischargePart" align="center" min-width="150" :label="$t('cg.chartRepair.unloading')">
+        <template slot-scope="scope">
+          <span :title="scope.row.dischargePart">
+            {{ scope.row.dischargePart | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 还船港 -->
+      <el-table-column prop="redeliveryPort" align="center" min-width="150" :label="$t('businessManagement.statistics.redelivery')">
+        <template slot-scope="scope">
+          <span :title="scope.row.redeliveryPort">
+            {{ scope.row.redeliveryPort | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 还船/航次结束时间(GMT） -->
+      <el-table-column prop="endDate" align="center" min-width="150" :label="$t('businessManagement.statistics.voyageEnd')">
+        <template slot-scope="scope">
+          <span :title="scope.row.endDate">
+            {{ scope.row.endDate | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 货物 -->
+      <el-table-column prop="goods" align="center" min-width="150" :label="$t('dispatchManagement.logAbstract.goods')">
+        <template slot-scope="scope">
+          <span :title="scope.row.goods">
+            {{ scope.row.goods | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 货量（吨） -->
+      <el-table-column prop="billOfLad" align="center" min-width="100" :label="$t('businessManagement.statistics.quantity')">
+        <template slot-scope="scope">
+          <span :title="scope.row.billOfLad">
+            {{ scope.row.billOfLad | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 日租金 -->
+      <el-table-column prop="dailyHire" align="right" min-width="150" :label="$t('businessManagement.tenancyManagement.dailyRent')">
+        <template slot-scope="scope">
+          <span :title="scope.row.dailyHire">
+            {{ scope.row.dailyHire | zero }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 运价 -->
+      <el-table-column prop="freightRate" align="right" min-width="150" :label="$t('businessManagement.tenancyManagement.freightRates')">
+        <template slot-scope="scope">
+          <span :title="scope.row.freightRate">
+            {{ scope.row.freightRate | zero }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 经营时间（天） -->
+      <el-table-column prop="operatingTime" align="center" min-width="150" :label="$t('businessManagement.statistics.operating')">
+        <template slot-scope="scope">
+          <span :title="scope.row.operatingTime">
+            {{ scope.row.operatingTime | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 运费/租金合计 -->
+      <el-table-column prop="freightTotal" align="right" min-width="150" :label="$t('businessManagement.statistics.total')">
+        <template slot-scope="scope">
+          <span :title="scope.row.freightTotal">
+            {{ scope.row.freightTotal | zero }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 收入合计 -->
+      <el-table-column prop="totalRevenue" align="right" min-width="150" :label="$t('businessManagement.statistics.income')">
+        <template slot-scope="scope">
+          <span :title="scope.row.totalRevenue">
+            {{ scope.row.totalRevenue | zero }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 币种 -->
+      <el-table-column prop="curry" align="center" min-width="100" :label="$t('cg.purchaseHistory.currencyType')">
+        <template slot-scope="scope">
+          <span :title="scope.row.currency">
+            {{ scope.row.currency | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 船东 -->
+      <el-table-column prop="shipOwner" min-width="300" :label="$t('crew.service.shipowner')">
+        <template slot-scope="scope">
+          <span :title="scope.row.shipOwner">
+            {{ scope.row.shipOwner | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 租家 -->
+      <el-table-column prop="rentHome" min-width="300" :label="$t('businessManagement.tenancyManagement.rentHome')">
+        <template slot-scope="scope">
+          <span :title="scope.row.rentHome">
+            {{ scope.row.rentHome | empty }}
+          </span>
+        </template>
+      </el-table-column>
+      <!-- 经纪人 -->
+      <el-table-column prop="agent" align="center" min-width="100" :label="$t('businessManagement.tenancyManagement.broker')">
+        <template slot-scope="scope">
+          <span :title="scope.row.agent">
+            {{ scope.row.agent | empty }}
+          </span>
+        </template>
+      </el-table-column>
+    </ws-normal-table>
+
+    <!-- 总计 -->
+    <div style="height:20px" v-if="total > 0">
+      <span class="budget-total">{{$t('shipRepairManagement.report.total') + $t('common.colon')}}
+        {{ message }}
+      </span>
+    </div>
+
+    <!-- 页面底部的分页 -->
+    <pagination
+      v-show="total> 0"
+      :total="total"
+      :page.sync="page.currentPage"
+      :limit.sync="page.pageSize"
+      @pagination="pageChanged"
+    />
+  </div>
+</template>
+<script>
+import Pagination from '@/components/Pagination'
+import { 
+  getPageByCondition,
+  getFreeMarketStatisticsTotalMoney
+} from '@/api/businessManagement/analysisApi';
+import { vesselListByCompId } from '@/api/basicData/basicData'; // 公用api接口
+import { getCompanyList } // 查询企业后台船东数据
+from "@/api/businessManagement/leaseApi";
+export default {
+  components: { Pagination },
+  filters: {
+    empty(value) {
+      return value ? value : '--';
+    },
+    zero(value) {
+      return value ? parseFloat(value).toFixed(2) : '0.00';
+    }
+    },
+  data () {
+    return {
+      loading: false,
+      dialogFilter: false,// 过滤弹窗标识
+      allShipName:'deploy.allShipName', // 船舶名称
+      shipList:[],
+      allCompName:'全部船东', // 船舶名称
+      shipownerList:[],
+      typeList:[
+        {key:'1',value:'外贸程租'},
+        {key:'2',value:'外贸期租'},
+        {key:'3',value:'内贸程租'},
+        {key:'4',value:'内贸期租'}
+      ],
+      shipOwnerId: [],
+      page: {
+        compId: sessionStorage.getItem("ws-pf_compId"),
+        vesselId: "",
+        shipOwnerId: '',
+        tradeType: '',
+        searchKeyword: '',
+        currentPage: 1,
+        pageSize: 10
+      },
+      total: 0,
+      tableData: [],
+      message: '',
+      indexList: [],
+    }
+  },
+  mounted() {
+    this.init();
+    this.getPage()
+  },
+  
+  methods: {
+    init(){
+      // 船舶集合
+      vesselListByCompId(this.page.compId).then(succ=> {
+        this.shipList = succ.data;
+        this.shipList.unshift({
+          vesselId: '',
+          vesselName: '全部船舶'
+        })
+      })
+      getCompanyList().then(succ => {
+        this.shipownerList = succ.data;
+      })
+    },
+    getPage(){
+      this.loading = true;
+      getPageByCondition(this.page).then(succ => {
+        this.tableData = []
+        this.total = succ.data.total;
+        let list = succ.data.records;
+        // 拆分数据
+        list.forEach(element => {
+          // 多段航次
+          if(element.voyInfoList && element.voyInfoList.length > 0){
+            element.voyInfoList.forEach(item => {
+              // 多段日租金
+              if(item.dailyRentInfoList && item.dailyRentInfoList.length > 0){
+                item.dailyRentInfoList.forEach(ele => {
+                  let objDaily= {};
+                  objDaily = Object.assign({}, element);
+                  objDaily.deliveryPort = item.deliveryPort;
+                  objDaily.dischargePart = item.dischargePart;
+                  objDaily.endDate = item.endDate;
+                  objDaily.loadingPart = item.loadingPart;
+                  objDaily.redeliveryPort = item.redeliveryPort;
+                  objDaily.startDate = item.startDate;
+                  objDaily.dailyRentInfoList = item.dailyRentInfoList;
+                  objDaily.operatingTime = ele.operatingTime;
+                  objDaily.dailyHire = ele.dailyHire;
+                  this.tableData.push(objDaily)
+                })
+              }
+              else{
+                  let objVoy= {};
+                  objVoy = Object.assign({}, element);
+                  objVoy.deliveryPort = item.deliveryPort;
+                  objVoy.dischargePart = item.dischargePart;
+                  objVoy.endDate = item.endDate;
+                  objVoy.loadingPart = item.loadingPart;
+                  objVoy.redeliveryPort = item.redeliveryPort;
+                  objVoy.startDate = item.startDate;
+                  objVoy.dailyRentInfoList = item.dailyRentInfoList;
+                  his.tableData.push(objVoy)
+              }
+            })
+          }
+          else{
+            this.tableData.push(element)
+          }
+        });
+        this.loading = false;
+        console.log('tableData', this.tableData)
+      })
+      getFreeMarketStatisticsTotalMoney(this.page).then(succ => {
+        this.message = succ.data;
+      })
+    },
+    // 行合并
+    objectSpanMethod({ row, column, rowIndex, columnIndex }) {
+      // 同一条船同一个合同的数据集合
+      let dataList = [];
+      dataList = this.tableData.filter(item=> {
+        return item.vesselId === row.vesselId && item.contractNo === row.contractNo
+      })
+      // 前四格的合并
+      if (columnIndex < 4) {
+        let rowsspan = 0;
+        // 第一行进行合并时直接向下合并数组长度的数据行
+        if (rowIndex === 0) {
+          rowsspan = dataList.length;
+        } 
+        // 其他行进行合并时要先判断它的上一行是否是同一个数据组，如果不是，说明本条数据是该组数据的第一条数据
+        // 然后由本条数据开始向下合并数组长度的数据行
+        else {
+          let vesselId = this.tableData[rowIndex - 1].vesselId;
+          let contractNo = this.tableData[rowIndex - 1].contractNo;
+          if (vesselId !== row.vesselId || contractNo !== row.contractNo) {
+            rowsspan = dataList.length;
+          }
+        }
+        return {
+          rowspan: rowsspan,
+          colspan: rowsspan > 0 ? 1 : 0
+        };
+      }
+      // 第五格到十三格的的合并
+      else if(columnIndex > 3 && columnIndex < 13){
+        let infoList = [];
+        infoList = this.tableData.filter(item=> {
+          return item.vesselId === row.vesselId && item.contractNo === row.contractNo && item.voyNo === row.voyNo
+        })
+        let rowsspan1 = 0;
+        // 第一行进行合并时直接向下合并数组长度的数据行
+        if (rowIndex === 0) {
+          rowsspan1 = infoList.length;
+        } 
+        // 其他行进行合并时要先判断它的上一行是否是同一个数据组，如果不是，说明本条数据是该组数据的第一条数据
+        // 然后由本条数据开始向下合并数组长度的数据行
+        else {
+          let vesselId = this.tableData[rowIndex - 1].vesselId;
+          let contractNo = this.tableData[rowIndex - 1].contractNo;
+          let voyNo = this.tableData[rowIndex - 1].voyNo;
+          if (vesselId !== row.vesselId || contractNo !== row.contractNo || voyNo !== row.voyNo) {
+            rowsspan1 = infoList.length;
+          }
+        }
+        return {
+          rowspan: rowsspan1,
+          colspan: rowsspan1 > 0 ? 1 : 0
+        };
+      }
+    },
+    // 船东下拉选触发事件
+    handleCompCommand() {
+      this.page.shipOwnerId = this.shipOwnerId.join(",");
+      this.page.currentPage = 1;
+      this.getPage();
+    },
+    // 船舶下拉选触发事件
+    handleCommand(command) {
+      this.allShipName = this.shipList.find(item => item.vesselId === command).vesselName;
+      this.page.vesselId = command;
+      this.page.currentPage = 1;
+      this.getPage();
+    },
+    // 过滤筛选中的确定按钮事件
+    handleConditionSearch() {
+      this.page.currentPage = 1;
+      this.getPage();
+      this.dialogFilter = false;
+    },
+    // 过滤的重置
+    resetSearch() {
+      this.page.tradeType = null;
+      this.page.currentPage = 1;
+      this.getPage();
+      this.dialogFilter = false;
+    },
+    // 重置关键字
+    resetSearchKeyword(){
+      this.page.searchKeyword = null;
+      this.page.currentPage = 1;
+      this.getPage();
+    },
+    // 分页函数
+    pageChanged(event, value) {
+      if (event === 'update:page') {
+        this.page.currentPage = value
+      } else if (event === 'update:limit') {
+        this.page.pageSize = value;
+      }
+    },
+  }
+}
+</script>
+<style lang="scss" scoped>
+  /deep/ .el-table__row:hover > td{
+    background-color: transparent !important;
+  }
+  /deep/ .el-table__body tr.hover-row > td{
+    background-color: transparent !important;
+  }
+  .searchThree{
+    /deep/ .el-input {
+      width: 300px;
+    }
+  }
+  .searchOne{
+    /deep/ .el-input {
+      width: 280px;
+    }
+  }
+  .budget-total{
+    float: right;
+    color: #333;
+    font-size: 14px;
+    padding-right: 60px;
+    font-weight: bold;
+    padding-top: 20px;
+  }
+</style>
