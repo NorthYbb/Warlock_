@@ -70,3 +70,63 @@ let b = new Set( [ 2, 5, 8 ] );
 差集:
     new Set( [...a].filter( x => !b.has( x ) ) ); // a里面的每一项，在b里面是没有的
 ————————————————
+
+
+vue中首页推荐栏有多个小图标自动换页并且轮播的学习笔记
+在模仿去哪儿APP开发中,首页有两个轮播,第一个是banner图的轮播,利用axios从服务端获取链接,然后swiper自动轮播.
+相对来说是一个比较普通的一个轮播界面.
+现在要做记录的是banner图下面的导航栏的轮播,在一个大的盒子里面有十几个小盒子
+而大盒子布局只能在一页中显示8个小盒子
+剩下的小盒子就要按照排列自动排到第二页,这个通过CSS可以很容易实现
+但是重点是让这个大盒子,能够自动轮播
+下面是一个组件里的盒子代码,需要将数据循环放到各个小盒子里,包括(imgUrl 和desc)
+在CSS中设定了每一页只能放置8个小盒子,当需要放置的盒子有10个甚至更多,会出现两页,让这两页轮播.
+<template>
+  <div class="icons">
+    <swiper>
+      <swiper-slide v-for="(page, index) in pages" :key="index">
+    <div class="icon" v-for="item in page" :key="item.id">
+      <div class="icon-img">
+        <img class="icon-img-content" :src="item.imgUrl" alt="">
+      </div>
+      <p class="icon-desc">{{item.desc}}</p>
+    </div>
+    </swiper-slide>
+  </swiper>
+  </div>
+</template>
+
+123456789101112131415
+获取item数组 遍历循环的过程跳过不谈
+现在重点是将每个小盒子能正常的放置到两页中
+iconList就是存储数据的数组
+这下面就是核心代码
+computed: {
+    pages () {
+    //定义一个一级数组
+      const pages = []
+      //进行遍历循环
+      this.iconList.forEach((item, index) => {
+      //定义一个二级数组,根据iconList索引号向下取整
+        const page = Math.floor(index / 8)
+        //进项判断,如果pages[page] 不存在
+        if (!pages[page]) {
+        //就将这个数组设定为空
+          pages[page] = []
+        }
+        //然后将item push到二级数组中
+        pages[page].push(item)
+      })
+      //返回这个一级数组
+      return pages
+    }
+  }
+1234567891011121314151617181920
+假设原先数组有10个值
+这段代码将原先的数组,重新遍历成为两个一级数组,
+第一个一级数组里有8个值,根据标签中的v-for放置在第一页中
+第二个一级数组里有2个值.放置到第二种.
+两个页面就能正常轮播了.
+————————————————
+版权声明：本文为CSDN博主「weixin_42542422」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/weixin_42542422/java/article/details/106679068
