@@ -43,3 +43,15 @@ Vue.prototype.nowFormatDate = function () {
   let currentdate = year + seperator1 + month + seperator1 + strDate;
   return currentdate;
 };
+
+//判断数组是否有重复元素
+function isRepeat(arr) {
+  let newArr = [];
+  for (let i in arr) {
+    if (newArr.includes(arr[i])) {
+      return true;
+    }
+    newArr.push(arr[i]);
+  }
+  return false;
+};
