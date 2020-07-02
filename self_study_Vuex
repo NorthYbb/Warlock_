@@ -57,3 +57,20 @@ methods: {
     ...mapActions('basics', ['init']),
    }
 可以看下 这个地址：https://www.cnblogs.com/mica/p/10757965.html 、 https://www.cnblogs.com/Yancyzheng/p/12714949.html
+
+// 航次总时间=航次结束时间-航次开始时间，结果是保留2位小数的天数
+      if (start && end) {
+        let time = new Date(end).getTime() - new Date(start).getTime() //时间差的毫秒数
+        //计算出相差天数
+        let days = Math.floor(time / (24 * 3600 * 1000))
+        //计算出小时数
+        let leave1 = time % (24 * 3600 * 1000) //计算天数后剩余的毫秒数
+        let hours = Math.floor(leave1 / (3600 * 1000))
+        //计算相差分钟数
+        let leave2 = leave1 % (3600 * 1000) //计算小时数后剩余的毫秒数
+        let minutes = Math.floor(leave2 / (60 * 1000))
+        //计算相差秒数
+        let ruselt = (days * 1 + hours / 24 + (minutes / 60 / 24) * 1).toFixed(
+          2
+        )
+      }
