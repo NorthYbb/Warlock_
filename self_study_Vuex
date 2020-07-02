@@ -1,0 +1,54 @@
+import { dynInit } from '@/model/dispatch/basicIndex'
+const state = {
+  // 参考模板集合
+  reference: [],
+}
+
+const mutations = {
+  // 参考模板集合
+  SET_REFERENCE: (state, data) => {
+    state.reference = [...data]
+    console.log('fdf', data)
+  }
+}
+
+const actions = {
+  async init({commit}, info) {
+      await dynInit({
+        compId: info.compId,
+        constCode: 'CONTRACT_TEMPLATE_TYPE'
+      })
+      .toPromise()
+      .then(data => {
+        commit('SET_REFERENCE', data)
+      })
+      .catch(error => {
+        console.info(error)
+      })
+  },
+}
+
+export default {
+  namespaced: true,
+  state,
+  mutations,
+  actions
+}
+
+
+页面上调用---
+可以输出 tihs 就会有你的 action state 等，一些方法
+输出--this.$store.state 可以找对应的 数据仓库
+
+ created() {
+ // example--
+    this.init({
+      compId: sessionStorage.getItem('ws-pf_compId')
+    })
+    let _refer = this.$store.state.basics.reference
+    拿到目标数据，可以做二次处理，或者 在mutations中获取到数据后，进行二次处理，页面只做接收
+  },
+methods: {
+// 要把仓库store 中的action引用到此使用
+    ...mapActions('basics', ['init']),
+   }
