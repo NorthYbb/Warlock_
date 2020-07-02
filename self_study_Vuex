@@ -26,6 +26,7 @@ const actions = {
         console.info(error)
       })
   },
+  // action中可能会有 N 个函数，也可以调用自己的其他方法
 }
 
 export default {
