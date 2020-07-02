@@ -1,3 +1,6 @@
+VUEX的使用个人理念--
+如果需要有大量的操作和数据需要在多个组件内使用的话呢，就可以用这个 Vuex
+
 import { dynInit } from '@/model/dispatch/basicIndex'
 const state = {
   // 参考模板集合
