@@ -44,6 +44,20 @@ export default {
 可以输出 tihs 就会有你的 action state 等，一些方法
 输出--this.$store.state 可以找对应的 数据仓库
 
+// 可以在 created 的时候，async/await 下,等数据拿到后进行下一步
+  async created() {
+    await this.init({
+      compId: sessionStorage.getItem('ws-pf_compId')
+    })
+
+    let _refer = this.$store.state.basics.reference
+    _refer.forEach(item => {
+      item.flag = 'delete'
+    })
+    this.baseList = _refer
+    this.initInfo(_refer)
+  },
+
  created() {
  // example--
     this.init({
