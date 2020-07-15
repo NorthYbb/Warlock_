@@ -88,3 +88,13 @@ methods: {
           2
         )
       }
+
+
+节流  import { throttle } from 'lodash'
+function: throttle(
+      function() {
+        // 逻辑操作
+      },
+      5000,
+      { trailing: false }
+    ),
