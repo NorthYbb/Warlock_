@@ -98,3 +98,12 @@ function: throttle(
       5000,
       { trailing: false }
     ),
+
+问题：回车和失去焦点事件同时触发
+使用element中新建标签的功能，按钮没隐藏，发现是因为keyup.enter和blur同时触发了
+原因：绑定了两个触发方式，执行了两次
+解决方法：@keyup.enter.native="$event.target.blur"
+将回车事件指向当前元素的失去焦点事件即可！
+
+@keyup.enter.native="$event.target.blur"
+@blur="handleBlur(node, data)"
