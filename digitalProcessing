@@ -90,3 +90,20 @@ const intersection = (list, ...args) => list.filter(item => args.every(list => l
 
  console.log(intersection([2, 1], [2, 3])) // [2]
  console.log(intersection([1, 2], [3, 4])) // []
+ 
+ 字符串前面空格去除与替换
+ const trimStart = str => str.replace(new RegExp('^([\\s]*)(.*)$'), '$2')
+ console.log(trimStart(' abc ')) // abc  
+ console.log(trimStart('123 ')) // 123
+ 
+ 字符串后面空格去除与替换
+ const trimEnd = str => str.replace(new RegExp('^(.*?)([\\s]*)$'), '$1')
+ console.log(trimEnd(' abc ')) //   abc  
+ console.log(trimEnd('123 ')) // 123
+ 
+ 获取元素类型
+ const dataType = obj => Object.prototype.toString.call(obj).replace(/^\[object (.+)\]$/, '$1').toLowerCase();
+ 
+ 
+ 判断是否是移动端
+ const isMobile = () => 'ontouchstart' in window
