@@ -243,6 +243,48 @@ prompt("sometext","默认");//输入数据并继续
   setTimeOut(function(){},时间);//设置方法执行的时间
   clearTimeOut(a);//停止，你必须在它设置的时间之前阻止它
 ————————————————
-
+// 格式化千分符
+export function formatMoney(s, n) {
+  if (s) {
+    n = n > 0 && n <= 20 ? n : 2
+    var flag = 1
+    if (s < 0) {
+      flag = 0
+      s = -s
+    }
+    s = parseFloat((s + '').replace(/[^\d\.-]/g, '')).toFixed(n) + ''
+    var l = s
+        .split('.')[0]
+        .split('')
+        .reverse(),
+      r = s.split('.')[1]
+    var t = ''
+    for (var i = 0; i < l.length; i++) {
+      t += l[i] + ((i + 1) % 3 == 0 && i + 1 != l.length ? ',' : '')
+    }
+    if (flag === 1) {
+      return (
+        t
+          .split('')
+          .reverse()
+          .join('') +
+        '.' +
+        r
+      )
+    } else {
+      return (
+        '-' +
+        t
+          .split('')
+          .reverse()
+          .join('') +
+        '.' +
+        r
+      )
+    }
+  } else {
+    return '0.00'
+  }
+}
 </body>
 </html>
