@@ -1,3 +1,50 @@
+Js 数组对象中指定相同的属性名归类的方法
+data:[
+        {
+          floor:'1F',date:'1559',value:'01'
+        },
+        {
+          floor:'2F',date:'1600',value:'02'
+        },
+        {
+          floor:'3F',date:'1600',value:'03'
+          
+        },
+        {
+          floor:'4F',date:'1559',value:'04'
+          
+        },
+        {
+          floor:'5F',date:'1601',value:'05'
+          
+        },
+        {
+          floor:'6F',date:'1601',value:'06'
+          
+        },
+        {
+          floor:'7F',date:'1602',value:'07'
+        }
+      ]
+this.handleSame(this.data)
+
+handleSame(data){
+      let newData = {}
+      data.forEach(e => {
+        //新建属性名
+        if (Object.keys(newData).indexOf('' + e.date) === -1) {
+          newData[e.date] = []
+        }
+        //对应插入属性值
+        newData[e.date].push(e)
+      })
+      console.log(newData);
+    }
+    
+    
+    ------------------------------
+
+
 js数组通过某个字段进行分组
 list: [
         {
