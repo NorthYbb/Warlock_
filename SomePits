@@ -1,3 +1,35 @@
+import Vue from "vue"
+
+// 只能输入数字
+const leaveNumOnly = Vue.directive('leaveNumOnly',function(el, binding, vnode){
+  const element = el.getElementsByTagName('input')[0]
+  let val = element.value
+  element.addEventListener('blur', function(){
+    vnode.data.model.callback(val.replace(/[^\d^\.]+/g,''))
+  })
+})
+
+// 只能输入两位小数
+const leaveTwoNumber  = Vue.directive('leaveTwoNumber',function(el, binding, vnode){
+  const element = el.getElementsByTagName('input')[0]
+  let val = vnode.data.model.value
+  element.addEventListener('blur',function(){
+    let num = val.replace(/[^\d^\.]+/g,'')
+    if(num){
+      vnode.data.model.callback(Number.parseFloat(num).toFixed(2))
+    }else{
+      vnode.data.model.callback('')
+    }
+  })
+})
+export default {
+  leaveNumOnly,
+  leaveTwoNumber
+}
+
+
+
+
 https://blog.csdn.net/u014225733/article/details/90602290  --日期时间工具（dayjs）的使用
 
 // 有时候想对已有对象上添加一些属性，但是有时候添加到对象上的属性并不会被触发更新，在这种情况下，可以创建一个新的对象，让它包含原有对象的属性和新的属性。
