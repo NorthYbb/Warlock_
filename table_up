@@ -1,138 +1,152 @@
+/*
+ * @Author: warlock.ss 
+ * @Date: 2022-01-24 09:11:45 
+ * @Last Modified by: warlock.ss
+ * @Last Modified time: 2022-01-24 16:28:47
+ */
 
 <template>
-  <div>
-    <button @click="handleSave">测试保存必填</button>
-
-    <el-table :data="tableArray" class="box-table" default-expand-all>
-      <el-table-column type="expand" header-align="left" align="left">
-        <template slot-scope="props">
-          <div v-for="(k, _index) in props.row.list" :key="k.id">
-            <el-row class="el-row-box">
-              <el-col class="col-num">
-                <i v-if="k.hasShoreBase">
-                  <img src="@/assets/new.png" alt />
-                </i>
-                <span>{{ _index + 1 }}</span>
-              </el-col>
-              <el-col
-                v-for="(j, _jindex) in staticFun(Object.keys(k))"
-                :key="_jindex"
-                :style="{
-                  width: defaultStyleW[_jindex],
-                }"
-              >
-                <template v-if="k.isEdit && _jindex > 4 && _jindex < 8">
-                  <el-select
+  <el-table :data="tableArray" class="box-table" default-expand-all>
+    <el-table-column type="expand" header-align="left" align="left" fixed>
+      <template slot-scope="props">
+        <div v-for="(k, _index) in props.row.list" :key="k.id">
+          <el-row class="el-row-box">
+            <el-col class="col-num">
+              <i v-if="k.hasShoreBase">
+                <img src="@/assets/new.png" alt />
+              </i>
+              <span>{{ _index + 1 }}</span>
+            </el-col>
+            <el-col
+              v-for="(j, _jindex) in staticFun(Object.keys(k))"
+              :key="_jindex"
+              :style="{
+                width: defaultStyleArray[_jindex]['width'],
+              }"
+              :class="hasOperate ? '' : j == 'remark' ? 'hasOperateW' : ''"
+            >
+              <template v-if="isEditHeaderArray.includes(j) && isEditFlag">
+                <el-select
+                  v-model="k[j]"
+                  filterable
+                  placeholder="请选择"
+                  :style="{
+                    width: '100%',
+                  }"
+                  v-if="selectionArray.includes(j)"
+                >
+                  <el-option
+                    v-for="item in brandArray"
+                    :key="item.id"
+                    :label="item.value"
+                    :value="item.id"
+                  >
+                  </el-option>
+                </el-select>
+                <template v-else>
+                  <!-- 整数 -->
+                  <el-input
+                    v-if="integerArray.includes(j)"
                     v-model="k[j]"
-                    filterable
-                    placeholder="请选择"
+                    v-number-input.float="0"
+                    placeholder="请输入内容"
+                    @blur="handleInputRow(k[j], k)"
                     :style="{
                       width: '100%',
                     }"
-                    v-if="_jindex === 6"
-                  >
-                    <el-option
-                      v-for="item in brandArray"
-                      :key="item.id"
-                      :label="item.value"
-                      :value="item.id"
-                    >
-                    </el-option>
-                  </el-select>
-                  <template v-else>
-                    <div v-for="r in requiredArray" :key="r">
-                      <el-input
-                        v-if="r == j"
-                        v-model="k[j]"
-                        v-number-input.float
-                        placeholder="请输入内容"
-                        @blur="handleInputRow(k[j], k)"
-                        :style="{
-                          width: '100%',
-                        }"
-                        :class="k.required ? 'input-color' : ''"
-                      ></el-input>
-                      <el-input
-                        v-else
-                        v-model="k[j]"
-                        placeholder="请输入内容"
-                        :style="{
-                          width: '100%',
-                        }"
-                      ></el-input>
-                    </div>
-                  </template>
+                    :class="k.required ? 'input-color' : ''"
+                  ></el-input>
+                  <el-input
+                    v-else
+                    v-model="k[j]"
+                    placeholder="请输入内容"
+                    :style="{
+                      width: '100%',
+                    }"
+                  ></el-input>
                 </template>
-                <template v-else>
-                  <span @click="handleClickRow(props.row, k)">{{ k[j] }}</span>
-                </template>
-              </el-col>
-              <!-- 附件 -->
-              <el-col style="text-align: center; width: 70px">
-                <template>
-                  <BaseFileIcon
-                    appendixIds="appendixIds"
-                    :value="k"
-                    editable
-                    :modalTitle="$t('upload.basicInfo')"
-                    :number="k.appendixIds"
-                  />
-                </template>
-              </el-col>
-              <!-- 删除 -->
-              <el-col style="text-align: center; width: 80px">
-                <template>
-                  <span @click="handleDelIcon(props.row.list, k, props.row.id)">
-                    <i class="el-icon-delete" style="font-size: 18px"></i>
-                  </span>
-                </template>
-              </el-col>
-            </el-row>
-            <div class="static-box">
-              <span
-                v-for="(v, _vIndex) in Object.values(k['viceObj'])"
-                :key="_vIndex"
-              >
-                <span>{{ viceArray[_vIndex] }}</span
-                ><span>{{ v }}</span>
-              </span>
-            </div>
+              </template>
+              <template v-else>
+                <span v-if="thousands.includes(j)">{{
+                  $fmoney(k[j] * 1)
+                }}</span>
+                <span
+                  @click="handleClickRow(props.row, k)"
+                  v-else
+                  :title="k[j]"
+                  class="over_text"
+                  >{{ k[j] }}</span
+                >
+              </template>
+            </el-col>
+            <!-- 附件 -->
+            <el-col style="text-align: center; width: 70px">
+              <template>
+                <BaseFileIcon
+                  appendixIds="appendixIds"
+                  :value="k"
+                  :isDisabled="!k.appendixIds"
+                  :editable="isEditFlag"
+                  :modalTitle="$t('upload.basicInfo')"
+                  :number="k.appendixIds"
+                />
+              </template>
+            </el-col>
+            <!-- 删除 -->
+            <el-col style="text-align: center; width: 80px" v-if="hasOperate">
+              <template>
+                <span @click="handleDelIcon(props.row.list, k, props.row.id)">
+                  <i class="el-icon-delete" style="font-size: 18px"></i>
+                </span>
+              </template>
+            </el-col>
+          </el-row>
+          <div class="static-box">
+            <span
+              v-for="(v, _vIndex) in Object.values(k['viceObj'])"
+              :key="_vIndex"
+            >
+              <span>{{ viceData[_vIndex] }}</span
+              ><span>{{ v }}</span>
+            </span>
           </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-for="v in lableArray"
-        :key="v.label"
-        :label="v.label"
-        :prop="v.title"
-        header-align="left"
-        align="left"
-        :width="v.width"
-        :render-header="renderHeader"
-      />
-      <el-table-column
-        label="附件"
-        fixed="right"
-        header-align="center"
-        align="center"
-        width="70px"
-      >
-      </el-table-column>
-      <el-table-column
-        label="操作"
-        fixed="right"
-        header-align="center"
-        align="center"
-        width="80px"
-      >
-        <template slot-scope="scope">
-          <span @click="handleDelIcon(tableArray, scope.row)">
-            <i class="el-icon-delete" style="font-size: 18px"></i>
-          </span>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
+        </div>
+      </template>
+    </el-table-column>
+    <el-table-column
+      v-for="v in lableArray"
+      :key="v.label"
+      :label="v.label"
+      :prop="v.title"
+      header-align="left"
+      align="left"
+      :fixed="v.title == 'title'"
+      :width="hasOperate ? v.width : v.title == 'remark' ? '480px' : v.width"
+      :render-header="renderHeader"
+    />
+    <el-table-column
+      label="附件"
+      fixed="right"
+      header-align="center"
+      align="center"
+      width="70px"
+    >
+    </el-table-column>
+    <el-table-column
+      label="操作"
+      fixed="right"
+      header-align="center"
+      align="center"
+      width="80px"
+      v-if="hasOperate"
+    >
+      <template slot-scope="scope">
+        <span @click="handleDelIcon(tableArray, scope.row)">
+          <i class="el-icon-delete" style="font-size: 18px"></i>
+        </span>
+      </template>
+    </el-table-column>
+  </el-table>
 </template>
 <script>
 import { EventBus } from 'base-core-lib'
@@ -158,21 +172,20 @@ export default {
         ]
       },
     },
-    // 表格宽度集合
-    defaultStyleW: {
-      type: Array,
-      default() {
-        return [
-          '200px',
-          '200px',
-          '400px',
-          '50px',
-          '100px',
-          '100px',
-          '200px',
-          '400px',
-        ]
-      },
+    // 是否显示操作列
+    hasOperate: {
+      type: Boolean,
+      default: true,
+    },
+    // 审核标识（一级or二级）
+    propsAuditFlag: {
+      type: [String, Number],
+      default: 0,
+    },
+    // 是否可以编辑
+    isEditFlag: {
+      type: Boolean,
+      default: false,
     },
     // 表格数据
     tableData: {
@@ -192,12 +205,21 @@ export default {
                 name5: '1',
                 applications: '1',
                 brandId: '1',
+                brandName: '测试1',
+                auditsNum: '',
+                auditsBrandId: '',
+                outsourcingQuantity: '9787547',
+                directSupply: '',
+                purchaseBrand: '',
+                supplier: '',
+                purchasePrice: '99974',
+                unitPrice: '5454',
+                subtotal: '9745487',
                 remark:
                   '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
                 text: '',
                 appendixIds: '918149049292996608',
                 hasShoreBase: true,
-                isEdit: true,
                 viceObj: {
                   boundQuantity: '10/0',
                   highestSecurityQuantity: '1/100',
@@ -215,11 +237,20 @@ export default {
                 name5: '1',
                 applications: '2',
                 brandId: '2',
+                brandName: '测试2',
+                auditsNum: '',
+                auditsBrandId: '',
+                outsourcingQuantity: '98787',
+                directSupply: '',
+                purchaseBrand: '',
+                supplier: '',
+                purchasePrice: '3435253',
+                unitPrice: '5454',
+                subtotal: '5676765466',
                 remark: '是亚洲中部大山系,也是中国西部山系的主干。',
                 text: '',
                 appendixIds: '',
                 hasShoreBase: false,
-                isEdit: true,
                 viceObj: {
                   boundQuantity: '10/0',
                   highestSecurityQuantity: '1/100',
@@ -232,29 +263,69 @@ export default {
           },
           {
             id: '2',
-            title: '阿尔卑斯山--A',
+            title: '喜马拉雅山脉--B',
             list: [
               {
                 id: '1',
-                name1: '阿尔卑斯山',
+                name1: '喜马拉雅山脉',
                 name2: '900*100',
-                name3: '阿尔卑斯山!',
+                name3: '喜马拉雅山脉,藏语意为雪的故乡!',
                 name4: '座',
                 name5: '1',
-                applications: '3',
+                applications: '1',
                 brandId: '1',
+                brandName: '测试1',
+                auditsNum: '',
+                auditsBrandId: '',
+                outsourcingQuantity: '9787547',
+                directSupply: '',
+                purchaseBrand: '',
+                supplier: '',
+                purchasePrice: '99974',
+                unitPrice: '5454',
+                subtotal: '9745487',
                 remark:
                   '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
                 text: '',
                 appendixIds: '918149049292996608',
                 hasShoreBase: true,
-                isEdit: true,
                 viceObj: {
-                  boundQuantity: '10/2',
-                  highestSecurityQuantity: '8/100',
+                  boundQuantity: '10/0',
+                  highestSecurityQuantity: '1/100',
                   signedDate: '2021-09-01/2021-10-01/2021-11-01',
                   signedQuantity: '20/50/54',
-                  notSigned: '120',
+                  notSigned: '99',
+                },
+              },
+              {
+                id: '2',
+                name1: '昆仑虚',
+                name2: '800*200',
+                name3: '中国第一神山、万祖之山、昆仑丘或玉山!',
+                name4: '座',
+                name5: '1',
+                applications: '2',
+                brandId: '2',
+                brandName: '测试2',
+                auditsNum: '',
+                auditsBrandId: '',
+                outsourcingQuantity: '98787',
+                directSupply: '',
+                purchaseBrand: '',
+                supplier: '',
+                purchasePrice: '3435253',
+                unitPrice: '5454',
+                subtotal: '5676765466',
+                remark: '是亚洲中部大山系,也是中国西部山系的主干。',
+                text: '',
+                appendixIds: '',
+                hasShoreBase: false,
+                viceObj: {
+                  boundQuantity: '10/0',
+                  highestSecurityQuantity: '1/100',
+                  signedDate: '2021-09-01/2021-10-01/2021-11-01',
+                  signedQuantity: '20/50/54',
+                  notSigned: '99',
                 },
               },
             ],
@@ -274,11 +345,11 @@ export default {
           },
           {
             label: '规格',
-            width: '200px',
+            width: '250px',
           },
           {
             label: '说明',
-            width: '400px',
+            width: '350px',
           },
           {
             label: '单位',
@@ -295,11 +366,53 @@ export default {
           },
           {
             label: '申请品牌',
-            width: '200px',
+            width: '150px',
           },
+
           {
             label: '备注',
-            width: '400px',
+            title: 'remark',
+            width: '450px',
+          },
+        ]
+      },
+    },
+    // 表格宽度集合
+    defaultStyleData: {
+      type: Array,
+      default() {
+        return [
+          {
+            width: '200px',
+            name: 'name1',
+          },
+          {
+            width: '250px',
+            name: 'name2',
+          },
+          {
+            width: '350px',
+            name: 'name3',
+          },
+          {
+            width: '50px',
+            name: 'name4',
+          },
+          {
+            width: '100px',
+            name: 'name5',
+          },
+          {
+            width: '100px',
+            name: 'applications',
+          },
+          {
+            width: '150px',
+            name: 'brandName',
+          },
+          {
+            width: '450px',
+            name: 'remark',
           },
         ]
       },
@@ -316,11 +429,11 @@ export default {
         ]
       },
     },
-    // 必填项
-    requiredData: {
+    // input入力- 整数
+    integerData: {
       type: Array,
       default() {
-        return ['applications']
+        return ['applications', 'outsourcingQuantity']
       },
     },
     // 固定静态展示项
@@ -334,16 +447,37 @@ export default {
           'name4',
           'name5',
           'applications',
-          'brandId',
+          'brandName',
           'remark',
         ]
+      },
+    },
+    // 可编辑表头集合
+    isEditHeaderData: {
+      type: Array,
+      default() {
+        return ['applications', 'brandName', 'remark']
+      },
+    },
+    // 下拉表头集合
+    selectionArray: {
+      type: Array,
+      default() {
+        return ['brandName', 'auditsBrandId']
+      },
+    },
+    // 千分符
+    thousands: {
+      type: Array,
+      default() {
+        return ['purchasePrice', 'unitPrice', 'subtotal']
       },
     },
   },
   computed: {
     staticFun() {
-      return function (a) {
-        return this.staticArray.filter((item) => a.includes(item))
+      return function (val) {
+        return this.staticArray.filter((item) => val.includes(item))
       }
     },
   },
@@ -363,16 +497,9 @@ export default {
       immediate: true,
       deep: true,
     },
-    viceData: {
+    defaultStyleData: {
       handler(newVal, oldVal) {
-        this.viceArray = newVal
-      },
-      immediate: true,
-      deep: true,
-    },
-    requiredData: {
-      handler(newVal, oldVal) {
-        this.requiredArray = newVal
+        this.defaultStyleArray = newVal
       },
       immediate: true,
       deep: true,
@@ -384,20 +511,197 @@ export default {
       immediate: true,
       deep: true,
     },
+    isEditHeaderData: {
+      handler(newVal, oldVal) {
+        this.isEditHeaderArray = newVal
+      },
+      immediate: true,
+      deep: true,
+    },
+    integerData: {
+      handler(newVal, oldVal) {
+        this.integerArray = newVal
+      },
+      immediate: true,
+      deep: true,
+    },
+
+    propsAuditFlag: {
+      handler(newVal, oldVal) {
+        // 一级审核 需要显示 审批数量 auditsNum 审批品牌 auditsBrandId
+        // isEditHeaderArray staticArray integerArray defaultStyleArray lableArray
+        if (newVal == 1) {
+          this.isEditHeaderArray = ['auditsNum', 'auditsBrandId', 'remark']
+          this.staticArray.splice(7, 0, 'auditsNum', 'auditsBrandId')
+          this.integerArray.push('auditsNum')
+          this.defaultStyleArray.splice(
+            7,
+            0,
+            {
+              width: '100px',
+              name: 'auditsNum',
+              auditFlag: '1',
+            },
+            {
+              width: '150px',
+              name: 'auditsBrandId',
+              auditFlag: '1',
+            }
+          )
+          this.lableArray.splice(
+            7,
+            0,
+            {
+              label: '审核数量',
+              title: 'required',
+              auditFlag: '1',
+              width: '100px',
+            },
+            {
+              label: '审核品牌',
+              title: 'required',
+              auditFlag: '1',
+              width: '150px',
+            }
+          )
+          this.lableArray.splice(5, 1, { label: '申请数量', width: '100px' })
+        } else if (newVal == 2) {
+          // 二级审核 需要显示 审批数量 审批品牌 岸基直接供船数量 采办品牌 供应商 平均采办单价 单价（元）小计（元）
+          this.isEditHeaderArray = ['outsourcingQuantity']
+          this.staticArray.splice(
+            7,
+            0,
+            'auditsNum',
+            'auditsBrandId',
+            'outsourcingQuantity',
+            'directSupply',
+            'purchaseBrand',
+            'supplier',
+            'purchasePrice',
+            'unitPrice',
+            'subtotal'
+          )
+          this.defaultStyleArray.splice(
+            7,
+            0,
+            {
+              width: '100px',
+              name: 'auditsNum',
+              auditFlag: '1',
+            },
+            {
+              width: '150px',
+              name: 'auditsBrandId',
+              auditFlag: '1',
+            },
+            {
+              label: '外采数量',
+              title: 'required',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '岸基直接供船数量',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '采办品牌',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '供应商',
+              auditFlag: '2',
+              width: '200px',
+            },
+            {
+              label: '平均采办单价',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '单价(元)',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '小计(元)',
+              auditFlag: '2',
+              width: '100px',
+            }
+          )
+          this.lableArray.splice(
+            7,
+            0,
+            {
+              label: '审核数量',
+              auditFlag: '1',
+              width: '100px',
+            },
+            {
+              label: '审核品牌',
+              auditFlag: '1',
+              width: '150px',
+            },
+            {
+              label: '外采数量',
+              title: 'required',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '岸基直接供船数量',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '采办品牌',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '供应商',
+              auditFlag: '2',
+              width: '200px',
+            },
+            {
+              label: '平均采办单价',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '单价(元)',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '小计(元)',
+              auditFlag: '2',
+              width: '100px',
+            }
+          )
+          this.lableArray.splice(5, 1, { label: '申请数量', width: '100px' })
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
   },
   data() {
     return {
       tableArray: [],
       lableArray: [],
-      viceArray: [],
-      requiredArray: [],
+      defaultStyleArray: [],
       staticArray: [],
+      isEditHeaderArray: [],
+      integerArray: [],
     }
   },
   created() {},
   methods: {
     renderHeader(h, { column }) {
-      if (column.property === 'required') {
+      if (column.property === 'required' && this.isEditFlag) {
         return h('span', [
           h('i', {
             class: 'el-icon-star-on',
@@ -454,19 +758,29 @@ export default {
           title: '分类名称--newly',
           list: [
             {
-              id: '',
-              name1: '阿尔比斯山脉',
-              name2: '777*100',
-              name3: '',
+              id: '1',
+              name1: '喜马拉雅山脉',
+              name2: '900*100',
+              name3: '喜马拉雅山脉,藏语意为雪的故乡!',
               name4: '座',
               name5: '1',
-              applications: '3',
+              applications: '1',
               brandId: '1',
-              remark: '',
+              brandName: '测试ADD',
+              auditsNum: '',
+              auditsBrandId: '',
+              outsourcingQuantity: '9787547',
+              directSupply: '',
+              purchaseBrand: '',
+              supplier: '',
+              purchasePrice: '99974',
+              unitPrice: '5454',
+              subtotal: '9745487',
+              remark:
+                '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
               text: '',
               appendixIds: '',
               hasShoreBase: true,
-              isEdit: true,
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
@@ -492,8 +806,10 @@ export default {
         })
       ) {
         EventBus.$emit('error', this.$t('请正确填入申请数量!'))
+        return
       }
       console.log('>>>', this.tableArray)
+      return this.tableArray
     },
   },
 }
@@ -506,6 +822,21 @@ export default {
   /deep/.el-table__header-wrapper {
     tr > th {
       border-right: 1px solid #ccc;
+    }
+  }
+  /deep/.el-table__body-wrapper {
+    tr.expanded > td {
+      background: #e2edfa;
+    }
+  }
+  /deep/.el-table__fixed {
+    tr.expanded > td {
+      background: #e2edfa;
+    }
+  }
+  /deep/.el-table__fixed-right {
+    tr.expanded > td {
+      background: #e2edfa;
     }
   }
 }
@@ -535,6 +866,16 @@ export default {
     border-left: 1px solid #ccc;
     width: 150px;
   }
+  .hasOperateW {
+    width: 480px !important;
+  }
+  .over_text {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+  }
   .input-color {
     /deep/.el-input__inner {
       border: 1px solid #ff0000;
@@ -547,7 +888,7 @@ export default {
   padding-left: 1rem;
   height: 40px;
   line-height: 40px;
-  background: aliceblue;
+  background-color: rgba(242, 242, 242, 1);
   span:last-child {
     flex: 0.5;
   }
