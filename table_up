@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-24 16:28:47
+ * @Last Modified time: 2022-01-25 17:36:54
  */
 
 <template>
@@ -10,7 +10,15 @@
     <el-table-column type="expand" header-align="left" align="left" fixed>
       <template slot-scope="props">
         <div v-for="(k, _index) in props.row.list" :key="k.id">
-          <el-row class="el-row-box">
+          <el-row
+            class="el-row-box"
+            :style="{
+              height:
+                propsAuditFlag === 2 || propsAuditFlag === 3
+                  ? variableHeight * k.multilevel.length + 'px'
+                  : variableHeight + 'px',
+            }"
+          >
             <el-col class="col-num">
               <i v-if="k.hasShoreBase">
                 <img src="@/assets/new.png" alt />
@@ -22,10 +30,30 @@
               :key="_jindex"
               :style="{
                 width: defaultStyleArray[_jindex]['width'],
+                height:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k.multilevel.length + 'px'
+                    : variableHeight + 'px',
+                lineHeight:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k.multilevel.length + 'px'
+                    : variableHeight + 'px',
               }"
-              :class="hasOperate ? '' : j == 'remark' ? 'hasOperateW' : ''"
+              :class="
+                hasOperate
+                  ? 'row_style_normal'
+                  : j == 'remark'
+                  ? 'hasOperateW'
+                  : 'row_style_normal'
+              "
             >
-              <template v-if="isEditHeaderArray.includes(j) && isEditFlag">
+              <template
+                v-if="
+                  isEditHeaderArray.includes(j) &&
+                  isEditFlag &&
+                  propsAuditFlag < 3
+                "
+              >
                 <el-select
                   v-model="k[j]"
                   filterable
@@ -33,7 +61,8 @@
                   :style="{
                     width: '100%',
                   }"
-                  v-if="selectionArray.includes(j)"
+                  v-if="selectionArray.includes(j) && propsAuditFlag < 2"
+                  @change="handelSelectBrand(k, j)"
                 >
                   <el-option
                     v-for="item in brandArray"
@@ -45,8 +74,35 @@
                 </el-select>
                 <template v-else>
                   <!-- 整数 -->
+                  <span
+                    v-if="
+                      integerArray.includes(j) &&
+                      mergeData.includes(j) &&
+                      (propsAuditFlag === 2 || propsAuditFlag === 3)
+                    "
+                  >
+                    <el-row
+                      class="merge_row"
+                      v-for="(g, _gindex) in k.multilevel"
+                      :key="_gindex"
+                    >
+                      <el-col @click="handleClickRow(props.row, k)">
+                        <el-input
+                          v-model="g[j]"
+                          v-number-input.float="0"
+                          placeholder="请输入内容"
+                          @blur="handleInputRow(g[j], k, propsAuditFlag, g)"
+                          :style="{
+                            width: '100%',
+                          }"
+                          :class="g.required ? 'input-color' : ''"
+                        ></el-input>
+                      </el-col>
+                    </el-row>
+                  </span>
+
                   <el-input
-                    v-if="integerArray.includes(j)"
+                    v-if="integerArray.includes(j) && propsAuditFlag < 2"
                     v-model="k[j]"
                     v-number-input.float="0"
                     placeholder="请输入内容"
@@ -57,7 +113,7 @@
                     :class="k.required ? 'input-color' : ''"
                   ></el-input>
                   <el-input
-                    v-else
+                    v-if="j === 'remark'"
                     v-model="k[j]"
                     placeholder="请输入内容"
                     :style="{
@@ -70,17 +126,72 @@
                 <span v-if="thousands.includes(j)">{{
                   $fmoney(k[j] * 1)
                 }}</span>
+                <span v-else-if="mergeData.includes(j)">
+                  <!-- coefficientChild -->
+                  <!-- purchaseQuantity: '',
+                signedQuantity: '',
+                purchaseBrand: '', -->
+                  <el-row
+                    v-for="(g, _gindex) in k.multilevel"
+                    :key="_gindex"
+                    class="merge_row"
+                    :style="{
+                      height:
+                        j == 'outsourcingQuantity' || j == 'directSupply'
+                          ? variableHeight * g.coefficient + 'px'
+                          : j == 'purchaseQuantity' ||
+                            j == 'signedQuantity' ||
+                            j == 'purchaseBrand'
+                          ? variableHeight * g.coefficientChild + 'px'
+                          : variableHeight + 'px',
+                      lineHeight:
+                        j == 'outsourcingQuantity' || j == 'directSupply'
+                          ? variableHeight * g.coefficient + 'px'
+                          : j == 'purchaseQuantity' ||
+                            j == 'signedQuantity' ||
+                            j == 'purchaseBrand'
+                          ? variableHeight * g.coefficientChild + 'px'
+                          : variableHeight + 'px',
+                      display:
+                        (j == 'outsourcingQuantity' || j == 'directSupply') &&
+                        _gindex !== g.coefficient - 1
+                          ? 'none'
+                          : (j == 'purchaseQuantity' ||
+                            j == 'signedQuantity' ||
+                            j == 'purchaseBrand')&&
+                       ( _gindex > g.coefficientChild+1 || _gindex == g.coefficientChild )?'none':''
+                    }"
+                  >
+                    <el-col @click="handleClickRow(props.row, k)">{{
+                      g[j]
+                    }}</el-col>
+                  </el-row>
+                </span>
                 <span
                   @click="handleClickRow(props.row, k)"
                   v-else
                   :title="k[j]"
                   class="over_text"
-                  >{{ k[j] }}</span
+                  >{{ showBrandName(k, j) }}</span
                 >
               </template>
             </el-col>
             <!-- 附件 -->
-            <el-col style="text-align: center; width: 70px">
+            <el-col
+              :style="{
+                width: '70px',
+                textAlign: 'center',
+                height:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k.multilevel.length + 'px'
+                    : variableHeight + 'px',
+                lineHeight:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k.multilevel.length + 'px'
+                    : variableHeight + 'px',
+              }"
+              class="row_style_normal"
+            >
               <template>
                 <BaseFileIcon
                   appendixIds="appendixIds"
@@ -93,7 +204,22 @@
               </template>
             </el-col>
             <!-- 删除 -->
-            <el-col style="text-align: center; width: 80px" v-if="hasOperate">
+            <el-col
+              :style="{
+                width: '80px',
+                textAlign: 'center',
+                height:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k.multilevel.length + 'px'
+                    : variableHeight + 'px',
+                lineHeight:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k.multilevel.length + 'px'
+                    : variableHeight + 'px',
+              }"
+              v-if="hasOperate"
+              class="row_style_normal"
+            >
               <template>
                 <span @click="handleDelIcon(props.row.list, k, props.row.id)">
                   <i class="el-icon-delete" style="font-size: 18px"></i>
@@ -101,12 +227,12 @@
               </template>
             </el-col>
           </el-row>
-          <div class="static-box">
+          <div class="static-box" v-if="propsAuditFlag !== 3">
             <span
-              v-for="(v, _vIndex) in Object.values(k['viceObj'])"
+              v-for="(v, _vIndex) in Object.values(k[grayFieldData])"
               :key="_vIndex"
             >
-              <span>{{ viceData[_vIndex] }}</span
+              <span>{{ viceData[_vIndex] + $t('common.colon') }}</span
               ><span>{{ v }}</span>
             </span>
           </div>
@@ -177,10 +303,10 @@ export default {
       type: Boolean,
       default: true,
     },
-    // 审核标识（一级or二级）
+    // 审核标识（0-基础版本or1-一级or2-二级or3-over）
     propsAuditFlag: {
-      type: [String, Number],
-      default: 0,
+      type: Number,
+      default: 3,
     },
     // 是否可以编辑
     isEditFlag: {
@@ -205,16 +331,96 @@ export default {
                 name5: '1',
                 applications: '1',
                 brandId: '1',
-                brandName: '测试1',
+                brandName: '黄金糕',
                 auditsNum: '',
-                auditsBrandId: '',
-                outsourcingQuantity: '9787547',
+                auditsBrandId: '2',
+                auditsBrandName: '双皮奶',
+                outsourcingQuantity: '',
                 directSupply: '',
+                purchaseQuantity: '',
+                signedQuantity: '',
                 purchaseBrand: '',
                 supplier: '',
                 purchasePrice: '99974',
                 unitPrice: '5454',
                 subtotal: '9745487',
+                multilevel: [
+                  {
+                    outsourcingQuantity: '10',
+                    directSupply: '',
+                    purchaseBrandId: '1',
+                    purchaseQuantity: '7',
+                    signedQuantity: '7',
+                    purchaseBrand: '安泰运动器材有限公司',
+                    supplier: '供应商A',
+                    isUnpick: true,
+                    coefficient: 2,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '10',
+                    directSupply: '',
+                    purchaseBrandId: '1',
+                    purchaseQuantity: '3',
+                    signedQuantity: '3',
+                    purchaseBrand: '江南五金厂',
+                    supplier: '供应商B',
+                    isUnpick: true,
+                    coefficient: 2, // coefficient 代表外采数量或者岸基直供有几个el-row
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '15',
+                    purchaseQuantity: '15',
+                    signedQuantity: '15',
+                    purchaseBrand: '一号',
+                    supplier: '供应商C',
+                    isUnpick: true,
+                    coefficient: 4,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '5',
+                    purchaseQuantity: '5',
+                    signedQuantity: '5',
+                    purchaseBrand: '二号',
+                    supplier: '供应商C',
+                    isUnpick: true,
+                    coefficient: 4,
+                    coefficientChild: 3,// coefficientChild 代表外采数量或者岸基直供采购品牌 数量 签收 有几个row
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '2',
+                    purchaseQuantity: '5',
+                    signedQuantity: '5',
+                    purchaseBrand: '二号',
+                    supplier: '供应商C',
+                    isUnpick: false,
+                    coefficient: 4,
+                    coefficientChild: 3,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '2',
+                    purchaseQuantity: '5',
+                    signedQuantity: '5',
+                    purchaseBrand: '二号',
+                    supplier: '供应商C',
+                    isUnpick: false,
+                    coefficient: 4,
+                    coefficientChild: 3,
+                    required: false,
+                  },
+                ],
                 remark:
                   '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
                 text: '',
@@ -230,43 +436,6 @@ export default {
               },
               {
                 id: '2',
-                name1: '昆仑虚',
-                name2: '800*200',
-                name3: '中国第一神山、万祖之山、昆仑丘或玉山!',
-                name4: '座',
-                name5: '1',
-                applications: '2',
-                brandId: '2',
-                brandName: '测试2',
-                auditsNum: '',
-                auditsBrandId: '',
-                outsourcingQuantity: '98787',
-                directSupply: '',
-                purchaseBrand: '',
-                supplier: '',
-                purchasePrice: '3435253',
-                unitPrice: '5454',
-                subtotal: '5676765466',
-                remark: '是亚洲中部大山系,也是中国西部山系的主干。',
-                text: '',
-                appendixIds: '',
-                hasShoreBase: false,
-                viceObj: {
-                  boundQuantity: '10/0',
-                  highestSecurityQuantity: '1/100',
-                  signedDate: '2021-09-01/2021-10-01/2021-11-01',
-                  signedQuantity: '20/50/54',
-                  notSigned: '99',
-                },
-              },
-            ],
-          },
-          {
-            id: '2',
-            title: '喜马拉雅山脉--B',
-            list: [
-              {
-                id: '1',
                 name1: '喜马拉雅山脉',
                 name2: '900*100',
                 name3: '喜马拉雅山脉,藏语意为雪的故乡!',
@@ -274,52 +443,74 @@ export default {
                 name5: '1',
                 applications: '1',
                 brandId: '1',
-                brandName: '测试1',
+                brandName: '黄金糕',
                 auditsNum: '',
-                auditsBrandId: '',
-                outsourcingQuantity: '9787547',
+                auditsBrandId: '2',
+                auditsBrandName: '双皮奶',
+                outsourcingQuantity: '',
                 directSupply: '',
+                purchaseQuantity: '',
+                signedQuantity: '',
                 purchaseBrand: '',
                 supplier: '',
                 purchasePrice: '99974',
                 unitPrice: '5454',
                 subtotal: '9745487',
+                multilevel: [
+                  {
+                    outsourcingQuantity: '10',
+                    directSupply: '',
+                    purchaseBrandId: '1',
+                    purchaseQuantity: '3',
+                    signedQuantity: '3',
+                    purchaseBrand: '江南五金厂',
+                    supplier: '供应商B',
+                    isUnpick: true,
+                    coefficient: 1,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '15',
+                    purchaseQuantity: '15',
+                    signedQuantity: '15',
+                    purchaseBrand: '二号',
+                    supplier: '供应商C',
+                    isUnpick: true,
+                    coefficient: 3,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '5',
+                    purchaseQuantity: '5',
+                    signedQuantity: '5',
+                    purchaseBrand: 'SAN号',
+                    supplier: '供应商D',
+                    isUnpick: true,
+                    coefficient: 3,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '5',
+                    purchaseQuantity: '5',
+                    signedQuantity: '5',
+                    purchaseBrand: 'WOU号',
+                    supplier: '供应商E',
+                    isUnpick: false,
+                    coefficient: 3,
+                    required: false,
+                  },
+                ],
                 remark:
                   '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
                 text: '',
                 appendixIds: '918149049292996608',
                 hasShoreBase: true,
-                viceObj: {
-                  boundQuantity: '10/0',
-                  highestSecurityQuantity: '1/100',
-                  signedDate: '2021-09-01/2021-10-01/2021-11-01',
-                  signedQuantity: '20/50/54',
-                  notSigned: '99',
-                },
-              },
-              {
-                id: '2',
-                name1: '昆仑虚',
-                name2: '800*200',
-                name3: '中国第一神山、万祖之山、昆仑丘或玉山!',
-                name4: '座',
-                name5: '1',
-                applications: '2',
-                brandId: '2',
-                brandName: '测试2',
-                auditsNum: '',
-                auditsBrandId: '',
-                outsourcingQuantity: '98787',
-                directSupply: '',
-                purchaseBrand: '',
-                supplier: '',
-                purchasePrice: '3435253',
-                unitPrice: '5454',
-                subtotal: '5676765466',
-                remark: '是亚洲中部大山系,也是中国西部山系的主干。',
-                text: '',
-                appendixIds: '',
-                hasShoreBase: false,
                 viceObj: {
                   boundQuantity: '10/0',
                   highestSecurityQuantity: '1/100',
@@ -408,7 +599,7 @@ export default {
           },
           {
             width: '150px',
-            name: 'brandName',
+            name: 'brandId',
           },
           {
             width: '450px',
@@ -417,23 +608,43 @@ export default {
         ]
       },
     },
+    // 合并表头集合
+    mergeData: {
+      type: Array,
+      default() {
+        return [
+          'outsourcingQuantity',
+          'directSupply',
+          'purchaseQuantity',
+          'signedQuantity',
+          'purchaseBrand',
+          'supplier',
+        ]
+      },
+    },
+    // 灰色文字
     viceData: {
       type: Array,
       default() {
         return [
-          '近一年入/出库数量:',
-          '安全/最高库存:',
-          '近3次签收时间::',
-          '近3次签收数量:',
-          '未签收数量:',
+          '近一年入/出库数量',
+          '安全/最高库存',
+          '近3次签收时间',
+          '近3次签收数量',
+          '未签收数量',
         ]
       },
+    },
+    // 灰色对象
+    grayFieldData: {
+      type: String,
+      default: 'viceObj',
     },
     // input入力- 整数
     integerData: {
       type: Array,
       default() {
-        return ['applications', 'outsourcingQuantity']
+        return ['applications']
       },
     },
     // 固定静态展示项
@@ -447,7 +658,7 @@ export default {
           'name4',
           'name5',
           'applications',
-          'brandName',
+          'brandId',
           'remark',
         ]
       },
@@ -456,14 +667,14 @@ export default {
     isEditHeaderData: {
       type: Array,
       default() {
-        return ['applications', 'brandName', 'remark']
+        return ['applications', 'brandId', 'remark']
       },
     },
     // 下拉表头集合
     selectionArray: {
       type: Array,
       default() {
-        return ['brandName', 'auditsBrandId']
+        return ['brandId', 'brandName', 'auditsBrandId', 'auditsBrandName']
       },
     },
     // 千分符
@@ -478,6 +689,13 @@ export default {
     staticFun() {
       return function (val) {
         return this.staticArray.filter((item) => val.includes(item))
+      }
+    },
+    showBrandName() {
+      return function (item, val) {
+        let _name = ''
+        _name = this.selectionArray[this.selectionArray.indexOf(val) + 1]
+        return this.selectionArray.includes(val) ? item[_name] : item[val]
       }
     },
   },
@@ -533,7 +751,7 @@ export default {
         if (newVal == 1) {
           this.isEditHeaderArray = ['auditsNum', 'auditsBrandId', 'remark']
           this.staticArray.splice(7, 0, 'auditsNum', 'auditsBrandId')
-          this.integerArray.push('auditsNum')
+          this.integerArray = ['auditsNum']
           this.defaultStyleArray.splice(
             7,
             0,
@@ -568,6 +786,7 @@ export default {
         } else if (newVal == 2) {
           // 二级审核 需要显示 审批数量 审批品牌 岸基直接供船数量 采办品牌 供应商 平均采办单价 单价（元）小计（元）
           this.isEditHeaderArray = ['outsourcingQuantity']
+          this.integerArray = ['outsourcingQuantity']
           this.staticArray.splice(
             7,
             0,
@@ -605,10 +824,140 @@ export default {
               auditFlag: '2',
               width: '150px',
             },
+
             {
               label: '采办品牌',
               auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '供应商',
+              auditFlag: '2',
+              width: '200px',
+            },
+            {
+              label: '平均采办单价',
+              auditFlag: '2',
+              width: '150px',
+            },
+
+            {
+              label: '单价(元)',
+              auditFlag: '2',
               width: '100px',
+            },
+            {
+              label: '小计(元)',
+              auditFlag: '2',
+              width: '100px',
+            }
+          )
+          this.lableArray.splice(
+            7,
+            0,
+            {
+              label: '审核数量',
+              auditFlag: '1',
+              width: '100px',
+            },
+            {
+              label: '审核品牌',
+              auditFlag: '1',
+              width: '150px',
+            },
+            {
+              label: '外采数量',
+              title: 'required',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '岸基直接供船数量',
+              auditFlag: '2',
+              width: '150px',
+            },
+
+            {
+              label: '采办品牌',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '供应商',
+              auditFlag: '2',
+              width: '200px',
+            },
+            {
+              label: '平均采办单价',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '单价(元)',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '小计(元)',
+              auditFlag: '2',
+              width: '100px',
+            }
+          )
+          this.lableArray.splice(5, 1, { label: '申请数量', width: '100px' })
+        } else if (newVal == 3) {
+          this.staticArray.splice(
+            7,
+            0,
+            'auditsNum',
+            'auditsBrandId',
+            'outsourcingQuantity',
+            'directSupply',
+            'purchaseQuantity',
+            'signedQuantity',
+            'purchaseBrand',
+            'supplier',
+            'purchasePrice',
+            'unitPrice',
+            'subtotal'
+          )
+          this.defaultStyleArray.splice(
+            7,
+            0,
+            {
+              width: '100px',
+              name: 'auditsNum',
+              auditFlag: '1',
+            },
+            {
+              width: '150px',
+              name: 'auditsBrandId',
+              auditFlag: '1',
+            },
+            {
+              label: '外采数量',
+              title: 'required',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '岸基直接供船数量',
+              auditFlag: '2',
+              width: '150px',
+            },
+            {
+              label: '采办数量',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '签收数量',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '采办品牌',
+              auditFlag: '2',
+              width: '150px',
             },
             {
               label: '供应商',
@@ -646,7 +995,6 @@ export default {
             },
             {
               label: '外采数量',
-              title: 'required',
               auditFlag: '2',
               width: '100px',
             },
@@ -656,9 +1004,19 @@ export default {
               width: '150px',
             },
             {
-              label: '采办品牌',
+              label: '采办数量',
               auditFlag: '2',
               width: '100px',
+            },
+            {
+              label: '签收数量',
+              auditFlag: '2',
+              width: '100px',
+            },
+            {
+              label: '采办品牌',
+              auditFlag: '2',
+              width: '150px',
             },
             {
               label: '供应商',
@@ -688,6 +1046,7 @@ export default {
       deep: true,
     },
   },
+
   data() {
     return {
       tableArray: [],
@@ -696,6 +1055,7 @@ export default {
       staticArray: [],
       isEditHeaderArray: [],
       integerArray: [],
+      variableHeight: 40,
     }
   },
   created() {},
@@ -716,12 +1076,19 @@ export default {
     handleClickRow(row, k) {
       console.log('aa', row, k)
     },
-    handleInputRow(row, k) {
+    handleInputRow(row, k, auditFlag, val) {
       if (!row) {
-        this.$set(k, 'required', true)
+        if (auditFlag) {
+          this.$set(val, 'required', true)
+        } else {
+          this.$set(k, 'required', true)
+        }
         EventBus.$emit('warning', this.$t('请正确填入申请数量!'))
         return
       } else {
+        if (auditFlag) {
+          this.$set(val, 'required', false)
+        }
         this.$set(k, 'required', false)
       }
     },
@@ -758,29 +1125,51 @@ export default {
           title: '分类名称--newly',
           list: [
             {
-              id: '1',
-              name1: '喜马拉雅山脉',
-              name2: '900*100',
-              name3: '喜马拉雅山脉,藏语意为雪的故乡!',
+              id: '',
+              name1: '昆仑虚',
+              name2: '800*200',
+              name3: '中国第一神山、万祖之山、昆仑丘或玉山!',
               name4: '座',
               name5: '1',
-              applications: '1',
-              brandId: '1',
-              brandName: '测试ADD',
+              applications: '2',
+              brandId: '',
+              brandName: '',
               auditsNum: '',
               auditsBrandId: '',
-              outsourcingQuantity: '9787547',
+              auditsBrandName: '',
+              outsourcingQuantity: '98787',
               directSupply: '',
+              purchaseQuantity: '',
+              signedQuantity: '',
               purchaseBrand: '',
               supplier: '',
-              purchasePrice: '99974',
+              purchasePrice: '3435253',
               unitPrice: '5454',
-              subtotal: '9745487',
-              remark:
-                '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
+              subtotal: '5676765466',
+              multilevel: [
+                {
+                  outsourcingQuantity: '1111111',
+                  directSupply: '',
+                  purchaseQuantity: '',
+                  signedQuantity: '',
+                  purchaseBrand: '',
+                  supplier: '',
+                  required: false,
+                },
+                {
+                  outsourcingQuantity: '22222',
+                  directSupply: '',
+                  purchaseQuantity: '',
+                  signedQuantity: '',
+                  purchaseBrand: '',
+                  supplier: '',
+                  required: false,
+                },
+              ],
+              remark: '是亚洲中部大山系,也是中国西部山系的主干。',
               text: '',
               appendixIds: '',
-              hasShoreBase: true,
+              hasShoreBase: false,
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
@@ -811,6 +1200,11 @@ export default {
       console.log('>>>', this.tableArray)
       return this.tableArray
     },
+    handelSelectBrand(data, j) {
+      let _name = ''
+      _name = this.selectionArray[this.selectionArray.indexOf(j) + 1]
+      data[_name] = this.brandArray.find((e) => e.id == data[j]).value
+    },
   },
 }
 </script>
@@ -825,49 +1219,50 @@ export default {
     }
   }
   /deep/.el-table__body-wrapper {
-    tr.expanded > td {
+    tr.el-table__row > td {
       background: #e2edfa;
     }
   }
   /deep/.el-table__fixed {
-    tr.expanded > td {
+    tr.el-table__row > td {
       background: #e2edfa;
     }
   }
   /deep/.el-table__fixed-right {
-    tr.expanded > td {
+    tr.el-table__row > td {
       background: #e2edfa;
     }
   }
 }
 .el-row-box {
+  position: relative;
   display: flex;
   text-align: left;
   height: 40px;
   align-items: center;
   border-bottom: 1px solid #ccc;
   .col-num {
-    position: relative;
     border-left: none;
     width: 47px;
     text-align: center;
     padding: 0;
     > i {
       position: absolute;
+      top: 0;
       left: 0;
       width: 0;
       height: 0;
     }
   }
-  > div {
+  .row_style_normal {
     padding: 0 5px;
-    height: 40px;
-    line-height: 40px;
     border-left: 1px solid #ccc;
     width: 150px;
   }
   .hasOperateW {
     width: 480px !important;
+    padding: 0 5px;
+    border-left: 1px solid #ccc;
   }
   .over_text {
     text-overflow: ellipsis;
@@ -875,6 +1270,11 @@ export default {
     overflow: hidden;
     display: inline-block;
     width: 100%;
+  }
+  .merge_row {
+    height: 40px;
+    line-height: 40px;
+    border-bottom: 1px solid #ccc;
   }
   .input-color {
     /deep/.el-input__inner {
