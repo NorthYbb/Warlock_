@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-25 18:09:41
+ * @Last Modified time: 2022-01-26 13:18:45
  */
 
 <template>
@@ -146,30 +146,32 @@
                       height:
                         j == 'outsourcingQuantity' || j == 'directSupply'
                           ? variableHeight * g.coefficient + 'px'
-                          : j == 'purchaseQuantity' ||
-                            j == 'signedQuantity' ||
-                            j == 'purchaseBrand' ||
-                            j == 'supplier'
-                          ? variableHeight * g.coefficientChild + 'px'
+                          : j == 'purchaseBrand'
+                          ? variableHeight * g.coefficientBrand + 'px'
+                          : j == 'supplier'
+                          ? variableHeight * g.coefficientSupplier + 'px'
                           : variableHeight + 'px',
                       lineHeight:
                         j == 'outsourcingQuantity' || j == 'directSupply'
                           ? variableHeight * g.coefficient + 'px'
-                          : j == 'purchaseQuantity' ||
-                            j == 'signedQuantity' ||
-                            j == 'purchaseBrand' ||
-                            j == 'supplier'
-                          ? variableHeight * g.coefficientChild + 'px'
+                          : j == 'purchaseBrand'
+                          ? variableHeight * g.coefficientBrand + 'px'
+                          : j == 'supplier'
+                          ? variableHeight * g.coefficientSupplier + 'px'
                           : variableHeight + 'px',
                       display:
                         (j == 'outsourcingQuantity' || j == 'directSupply') &&
                         _gindex != 0 &&
                         _gindex != k.multilevel[0].coefficient
                           ? 'none'
-                          : (j == 'purchaseBrand' || j == 'supplier') &&
-                            (_gindex > g.coefficientChild + 1 ||
-                              _gindex == g.coefficientChild)
-                          ? 'none'
+                          : j == 'purchaseBrand' && g.coefficientBrand > 1
+                          ? _gindex < g.coefficientBrand
+                            ? 'none'
+                            : ''
+                          : j == 'supplier' && g.coefficientSupplier > 1
+                          ? _gindex < g.coefficientSupplier - 1
+                            ? 'none'
+                            : ''
                           : '',
                     }"
                   >
@@ -365,6 +367,8 @@ export default {
                     purchaseBrand: '安泰运动器材有限公司',
                     supplier: '供应商A',
                     coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
+                    coefficientBrand: 1,
+                    coefficientSupplier: 1,
                     required: false,
                   },
                   {
@@ -375,10 +379,11 @@ export default {
                     signedQuantity: '15',
                     purchaseBrand: '农夫山泉',
                     supplier: '供应商C1',
-                    coefficient: 3,
+                    coefficient: 4,
+                    coefficientBrand: 2, // coefficientBrand相同采购品牌的个数
+                    coefficientSupplier: 1,
                     required: false,
                   },
-                  // coefficientChild: 1, // coefficientChild 代表外采数量或者岸基直供采购品牌 数量 签收 有几个row
                   {
                     outsourcingQuantity: '',
                     directSupply: '20',
@@ -387,7 +392,9 @@ export default {
                     signedQuantity: '5',
                     purchaseBrand: '农夫山泉',
                     supplier: '供应商C',
-                    coefficient: 3,
+                    coefficient: 4,
+                    coefficientBrand: 2,
+                    coefficientSupplier: 1,
                     required: false,
                   },
                   {
@@ -396,9 +403,24 @@ export default {
                     purchaseBrandId: '2',
                     purchaseQuantity: '52',
                     signedQuantity: '54',
-                    purchaseBrand: 'DDDD号',
+                    purchaseBrand: '农夫山泉EE',
                     supplier: '供应商G',
-                    coefficient: 3,
+                    coefficient: 4,
+                    coefficientBrand: 1,
+                    coefficientSupplier: 1,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '',
+                    directSupply: '20',
+                    purchaseBrandId: '2',
+                    purchaseQuantity: '52',
+                    signedQuantity: '54',
+                    purchaseBrand: '农夫S山泉',
+                    supplier: '供应商EG',
+                    coefficient: 4,
+                    coefficientBrand: 1,
+                    coefficientSupplier: 1,
                     required: false,
                   },
                 ],
@@ -447,6 +469,8 @@ export default {
                     purchaseBrand: '江南五金厂-WOURTE',
                     supplier: '供应商G',
                     coefficient: 3,
+                    coefficientBrand: 1,
+                    coefficientSupplier: 3,
                     required: false,
                   },
                   {
@@ -458,6 +482,8 @@ export default {
                     purchaseBrand: '江南五金厂-PIGE',
                     supplier: '供应商G',
                     coefficient: 3,
+                    coefficientBrand: 1,
+                    coefficientSupplier: 3,
                     required: false,
                   },
                   {
@@ -467,8 +493,10 @@ export default {
                     purchaseQuantity: '3',
                     signedQuantity: '3',
                     purchaseBrand: '江南五金厂-SHAOYAO',
-                    supplier: '供应商GJ',
+                    supplier: '供应商G',
                     coefficient: 3,
+                    coefficientBrand: 1,
+                    coefficientSupplier: 3,
                     required: false,
                   },
                   {
@@ -480,6 +508,8 @@ export default {
                     purchaseBrand: '二号',
                     supplier: '供应商C',
                     coefficient: 1,
+                    coefficientBrand: 1,
+                    coefficientSupplier: 1,
                     required: false,
                   },
                 ],
@@ -1071,6 +1101,7 @@ export default {
     },
 
     handleDelIcon(item, val, key) {
+      // callback 抛到上层处理
       let _parentText = '此操作将永久删除设备分类文件, 是否继续?',
         _childText = '此操作将永久删除子文件, 是否继续?'
       this.$confirm(key ? _childText : _parentText, '提示', {
@@ -1159,23 +1190,6 @@ export default {
         },
       ]
       this.tableArray.unshift(..._arry)
-    },
-    handleSave() {
-      let _verifyData = []
-      this.tableArray.map((v) => {
-        _verifyData.push(...v.list)
-      })
-
-      if (
-        _verifyData.some((s) => {
-          return s.required
-        })
-      ) {
-        EventBus.$emit('error', this.$t('请正确填入申请数量!'))
-        return
-      }
-      console.log('>>>', this.tableArray)
-      return this.tableArray
     },
     handelSelectBrand(data, j) {
       let _name = ''
