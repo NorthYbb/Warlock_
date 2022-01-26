@@ -2,20 +2,20 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-26 13:18:45
+ * @Last Modified time: 2022-01-26 15:41:36
  */
 
 <template>
   <el-table :data="tableArray" class="box-table" default-expand-all>
     <el-table-column type="expand" header-align="left" align="left" fixed>
       <template slot-scope="props">
-        <div v-for="(k, _index) in props.row.list" :key="k.id">
+        <div v-for="k in props.row.list" :key="k.id">
           <el-row
             class="el-row-box"
             :style="{
               height:
                 propsAuditFlag === 2 || propsAuditFlag === 3
-                  ? variableHeight * k.multilevel.length + 'px'
+                  ? variableHeight * k[multilevelData].length + 'px'
                   : variableHeight + 'px',
             }"
           >
@@ -23,7 +23,7 @@
               <i v-if="k.hasShoreBase">
                 <img src="@/assets/new.png" alt />
               </i>
-              <span>{{ _index + 1 }}</span>
+              <span>{{ k.newIndex }}</span>
             </el-col>
             <el-col
               v-for="(j, _jindex) in staticFun(Object.keys(k))"
@@ -32,11 +32,11 @@
                 width: defaultStyleArray[_jindex]['width'],
                 height:
                   propsAuditFlag === 2 || propsAuditFlag === 3
-                    ? variableHeight * k.multilevel.length + 'px'
+                    ? variableHeight * k[multilevelData].length + 'px'
                     : variableHeight + 'px',
                 lineHeight:
                   propsAuditFlag === 2 || propsAuditFlag === 3
-                    ? variableHeight * k.multilevel.length + 'px'
+                    ? variableHeight * k[multilevelData].length + 'px'
                     : variableHeight + 'px',
               }"
               :class="
@@ -83,15 +83,16 @@
                   >
                     <el-row
                       class="merge_row"
-                      v-for="(g, _gindex) in k.multilevel"
+                      v-for="(g, _gindex) in k[multilevelData]"
                       :key="_gindex"
                       :style="{
                         height: variableHeight + 'px',
                         lineHeight: variableHeight + 'px',
                         display:
-                          j == 'outsourcingQuantity' && g['directSupply']
+                          j == mergeData[0] && g[mergeData[1]]
                             ? _gindex <
-                              g.coefficient + k.multilevel[0].coefficient
+                              g[mergeQuantity[0]] +
+                                k[multilevelData][0][mergeQuantity[0]]
                               ? 'none'
                               : ''
                             : '',
@@ -100,7 +101,7 @@
                       <el-col @click="handleClickRow(props.row, k)">
                         <el-input
                           v-model="g[j]"
-                          v-number-input.float="0"
+                          v-number-input.float="2"
                           placeholder="请输入内容"
                           @blur="handleInputRow(g[j], k, propsAuditFlag, g)"
                           :style="{
@@ -115,7 +116,7 @@
                   <el-input
                     v-if="integerArray.includes(j) && propsAuditFlag < 2"
                     v-model="k[j]"
-                    v-number-input.float="0"
+                    v-number-input.float="2"
                     placeholder="请输入内容"
                     @blur="handleInputRow(k[j], k)"
                     :style="{
@@ -139,39 +140,23 @@
                 }}</span>
                 <span v-else-if="mergeData.includes(j)">
                   <el-row
-                    v-for="(g, _gindex) in k.multilevel"
+                    v-for="(g, _gindex) in k[multilevelData]"
                     :key="_gindex"
                     class="merge_row"
                     :style="{
                       height:
-                        j == 'outsourcingQuantity' || j == 'directSupply'
-                          ? variableHeight * g.coefficient + 'px'
-                          : j == 'purchaseBrand'
-                          ? variableHeight * g.coefficientBrand + 'px'
-                          : j == 'supplier'
-                          ? variableHeight * g.coefficientSupplier + 'px'
+                        j == mergeData[0] || j == mergeData[1]
+                          ? variableHeight * g[mergeQuantity[0]] + 'px'
                           : variableHeight + 'px',
                       lineHeight:
-                        j == 'outsourcingQuantity' || j == 'directSupply'
-                          ? variableHeight * g.coefficient + 'px'
-                          : j == 'purchaseBrand'
-                          ? variableHeight * g.coefficientBrand + 'px'
-                          : j == 'supplier'
-                          ? variableHeight * g.coefficientSupplier + 'px'
+                        j == mergeData[0] || j == mergeData[1]
+                          ? variableHeight * g[mergeQuantity[0]] + 'px'
                           : variableHeight + 'px',
                       display:
-                        (j == 'outsourcingQuantity' || j == 'directSupply') &&
+                        (j == mergeData[0] || j == mergeData[1]) &&
                         _gindex != 0 &&
-                        _gindex != k.multilevel[0].coefficient
+                        _gindex != k[multilevelData][0][mergeQuantity[0]]
                           ? 'none'
-                          : j == 'purchaseBrand' && g.coefficientBrand > 1
-                          ? _gindex < g.coefficientBrand
-                            ? 'none'
-                            : ''
-                          : j == 'supplier' && g.coefficientSupplier > 1
-                          ? _gindex < g.coefficientSupplier - 1
-                            ? 'none'
-                            : ''
                           : '',
                     }"
                   >
@@ -196,11 +181,11 @@
                 textAlign: 'center',
                 height:
                   propsAuditFlag === 2 || propsAuditFlag === 3
-                    ? variableHeight * k.multilevel.length + 'px'
+                    ? variableHeight * k[multilevelData].length + 'px'
                     : variableHeight + 'px',
                 lineHeight:
                   propsAuditFlag === 2 || propsAuditFlag === 3
-                    ? variableHeight * k.multilevel.length + 'px'
+                    ? variableHeight * k[multilevelData].length + 'px'
                     : variableHeight + 'px',
               }"
               class="row_style_normal"
@@ -223,11 +208,11 @@
                 textAlign: 'center',
                 height:
                   propsAuditFlag === 2 || propsAuditFlag === 3
-                    ? variableHeight * k.multilevel.length + 'px'
+                    ? variableHeight * k[multilevelData].length + 'px'
                     : variableHeight + 'px',
                 lineHeight:
                   propsAuditFlag === 2 || propsAuditFlag === 3
-                    ? variableHeight * k.multilevel.length + 'px'
+                    ? variableHeight * k[multilevelData].length + 'px'
                     : variableHeight + 'px',
               }"
               v-if="hasOperate"
@@ -265,7 +250,6 @@
     />
     <el-table-column
       label="附件"
-      fixed="right"
       header-align="center"
       align="center"
       width="70px"
@@ -319,12 +303,12 @@ export default {
     // 审核标识（0-基础版本or1-一级or2-二级or3-over）
     propsAuditFlag: {
       type: Number,
-      default: 3,
+      default: 1,
     },
     // 是否可以编辑
     isEditFlag: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     // 表格数据
     tableData: {
@@ -332,7 +316,7 @@ export default {
       default() {
         return [
           {
-            id: '1',
+            id: '8',
             title: '喜马拉雅山脉--A',
             list: [
               {
@@ -367,8 +351,6 @@ export default {
                     purchaseBrand: '安泰运动器材有限公司',
                     supplier: '供应商A',
                     coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
-                    coefficientBrand: 1,
-                    coefficientSupplier: 1,
                     required: false,
                   },
                   {
@@ -380,8 +362,6 @@ export default {
                     purchaseBrand: '农夫山泉',
                     supplier: '供应商C1',
                     coefficient: 4,
-                    coefficientBrand: 2, // coefficientBrand相同采购品牌的个数
-                    coefficientSupplier: 1,
                     required: false,
                   },
                   {
@@ -393,8 +373,6 @@ export default {
                     purchaseBrand: '农夫山泉',
                     supplier: '供应商C',
                     coefficient: 4,
-                    coefficientBrand: 2,
-                    coefficientSupplier: 1,
                     required: false,
                   },
                   {
@@ -406,8 +384,6 @@ export default {
                     purchaseBrand: '农夫山泉EE',
                     supplier: '供应商G',
                     coefficient: 4,
-                    coefficientBrand: 1,
-                    coefficientSupplier: 1,
                     required: false,
                   },
                   {
@@ -419,97 +395,6 @@ export default {
                     purchaseBrand: '农夫S山泉',
                     supplier: '供应商EG',
                     coefficient: 4,
-                    coefficientBrand: 1,
-                    coefficientSupplier: 1,
-                    required: false,
-                  },
-                ],
-                remark:
-                  '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
-                text: '',
-                appendixIds: '918149049292996608',
-                hasShoreBase: true,
-                viceObj: {
-                  boundQuantity: '10/0',
-                  highestSecurityQuantity: '1/100',
-                  signedDate: '2021-09-01/2021-10-01/2021-11-01',
-                  signedQuantity: '20/50/54',
-                  notSigned: '99',
-                },
-              },
-              {
-                id: '2',
-                name1: '喜马拉雅山脉',
-                name2: '900*100',
-                name3: '喜马拉雅山脉,藏语意为雪的故乡!',
-                name4: '座',
-                name5: '1',
-                applications: '1',
-                brandId: '1',
-                brandName: '黄金糕',
-                auditsNum: '',
-                auditsBrandId: '2',
-                auditsBrandName: '双皮奶',
-                outsourcingQuantity: '',
-                directSupply: '',
-                purchaseQuantity: '',
-                signedQuantity: '',
-                purchaseBrand: '',
-                supplier: '',
-                purchasePrice: '99974',
-                unitPrice: '5454',
-                subtotal: '9745487',
-                multilevel: [
-                  {
-                    outsourcingQuantity: '10',
-                    directSupply: '',
-                    purchaseBrandId: '1',
-                    purchaseQuantity: '3',
-                    signedQuantity: '3',
-                    purchaseBrand: '江南五金厂-WOURTE',
-                    supplier: '供应商G',
-                    coefficient: 3,
-                    coefficientBrand: 1,
-                    coefficientSupplier: 3,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '10',
-                    directSupply: '',
-                    purchaseBrandId: '1',
-                    purchaseQuantity: '3',
-                    signedQuantity: '3',
-                    purchaseBrand: '江南五金厂-PIGE',
-                    supplier: '供应商G',
-                    coefficient: 3,
-                    coefficientBrand: 1,
-                    coefficientSupplier: 3,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '10',
-                    directSupply: '',
-                    purchaseBrandId: '1',
-                    purchaseQuantity: '3',
-                    signedQuantity: '3',
-                    purchaseBrand: '江南五金厂-SHAOYAO',
-                    supplier: '供应商G',
-                    coefficient: 3,
-                    coefficientBrand: 1,
-                    coefficientSupplier: 3,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '15',
-                    purchaseQuantity: '15',
-                    signedQuantity: '15',
-                    purchaseBrand: '二号',
-                    supplier: '供应商C',
-                    coefficient: 1,
-                    coefficientBrand: 1,
-                    coefficientSupplier: 1,
                     required: false,
                   },
                 ],
@@ -629,6 +514,20 @@ export default {
         ]
       },
     },
+    // 子集需要合并的字段属性
+    mergeQuantity: {
+      type: Array,
+      default() {
+        return [
+          'coefficient',
+        ]
+      },
+    },
+    // 子集需要合并的字段属性对象
+    multilevelData: {
+      type: String,
+      default: 'multilevel',
+    },
     // 灰色文字
     viceData: {
       type: Array,
@@ -710,6 +609,13 @@ export default {
   watch: {
     tableData: {
       handler(newVal, oldVal) {
+        let _list = []
+        newVal.map((s) => {
+          _list.push(...s.list)
+        })
+        _list.map((k, _kindex) => {
+          this.$set(k, 'newIndex', _kindex + 1)
+        })
         this.tableArray = newVal
       },
       immediate: true,
@@ -1081,6 +987,7 @@ export default {
       }
     },
     handleClickRow(row, k) {
+      // 用于 平均采办单价 历史弹层的操作
       console.log('aa', row, k)
     },
     handleInputRow(row, k, auditFlag, val) {
@@ -1101,7 +1008,6 @@ export default {
     },
 
     handleDelIcon(item, val, key) {
-      // callback 抛到上层处理
       let _parentText = '此操作将永久删除设备分类文件, 是否继续?',
         _childText = '此操作将永久删除子文件, 是否继续?'
       this.$confirm(key ? _childText : _parentText, '提示', {
@@ -1110,18 +1016,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          let _index = item.findIndex((i) => {
-            if (i.id === val.id) {
-              return true
-            }
-          })
-          item.splice(_index, 1)
-          if (key && item == false) {
-            this.tableArray = this.tableArray.filter((h) => {
-              return h.id !== key
-            })
-          }
-          EventBus.$emit('success', this.$t('删除成功!'))
+          // callback 抛到上层处理,组件接收新的表格数据渲染
         })
         .catch(() => {})
     },
