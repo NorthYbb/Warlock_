@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-25 17:36:54
+ * @Last Modified time: 2022-01-25 18:09:41
  */
 
 <template>
@@ -85,6 +85,17 @@
                       class="merge_row"
                       v-for="(g, _gindex) in k.multilevel"
                       :key="_gindex"
+                      :style="{
+                        height: variableHeight + 'px',
+                        lineHeight: variableHeight + 'px',
+                        display:
+                          j == 'outsourcingQuantity' && g['directSupply']
+                            ? _gindex <
+                              g.coefficient + k.multilevel[0].coefficient
+                              ? 'none'
+                              : ''
+                            : '',
+                      }"
                     >
                       <el-col @click="handleClickRow(props.row, k)">
                         <el-input
@@ -127,10 +138,6 @@
                   $fmoney(k[j] * 1)
                 }}</span>
                 <span v-else-if="mergeData.includes(j)">
-                  <!-- coefficientChild -->
-                  <!-- purchaseQuantity: '',
-                signedQuantity: '',
-                purchaseBrand: '', -->
                   <el-row
                     v-for="(g, _gindex) in k.multilevel"
                     :key="_gindex"
@@ -141,7 +148,8 @@
                           ? variableHeight * g.coefficient + 'px'
                           : j == 'purchaseQuantity' ||
                             j == 'signedQuantity' ||
-                            j == 'purchaseBrand'
+                            j == 'purchaseBrand' ||
+                            j == 'supplier'
                           ? variableHeight * g.coefficientChild + 'px'
                           : variableHeight + 'px',
                       lineHeight:
@@ -149,17 +157,20 @@
                           ? variableHeight * g.coefficient + 'px'
                           : j == 'purchaseQuantity' ||
                             j == 'signedQuantity' ||
-                            j == 'purchaseBrand'
+                            j == 'purchaseBrand' ||
+                            j == 'supplier'
                           ? variableHeight * g.coefficientChild + 'px'
                           : variableHeight + 'px',
                       display:
                         (j == 'outsourcingQuantity' || j == 'directSupply') &&
-                        _gindex !== g.coefficient - 1
+                        _gindex != 0 &&
+                        _gindex != k.multilevel[0].coefficient
                           ? 'none'
-                          : (j == 'purchaseQuantity' ||
-                            j == 'signedQuantity' ||
-                            j == 'purchaseBrand')&&
-                       ( _gindex > g.coefficientChild+1 || _gindex == g.coefficientChild )?'none':''
+                          : (j == 'purchaseBrand' || j == 'supplier') &&
+                            (_gindex > g.coefficientChild + 1 ||
+                              _gindex == g.coefficientChild)
+                          ? 'none'
+                          : '',
                     }"
                   >
                     <el-col @click="handleClickRow(props.row, k)">{{
@@ -349,24 +360,11 @@ export default {
                     outsourcingQuantity: '10',
                     directSupply: '',
                     purchaseBrandId: '1',
-                    purchaseQuantity: '7',
-                    signedQuantity: '7',
-                    purchaseBrand: '安泰运动器材有限公司',
-                    supplier: '供应商A',
-                    isUnpick: true,
-                    coefficient: 2,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '10',
-                    directSupply: '',
-                    purchaseBrandId: '1',
                     purchaseQuantity: '3',
                     signedQuantity: '3',
-                    purchaseBrand: '江南五金厂',
-                    supplier: '供应商B',
-                    isUnpick: true,
-                    coefficient: 2, // coefficient 代表外采数量或者岸基直供有几个el-row
+                    purchaseBrand: '安泰运动器材有限公司',
+                    supplier: '供应商A',
+                    coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
                     required: false,
                   },
                   {
@@ -375,49 +373,32 @@ export default {
                     purchaseBrandId: '15',
                     purchaseQuantity: '15',
                     signedQuantity: '15',
-                    purchaseBrand: '一号',
-                    supplier: '供应商C',
-                    isUnpick: true,
-                    coefficient: 4,
+                    purchaseBrand: '农夫山泉',
+                    supplier: '供应商C1',
+                    coefficient: 3,
                     required: false,
                   },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '5',
-                    purchaseQuantity: '5',
-                    signedQuantity: '5',
-                    purchaseBrand: '二号',
-                    supplier: '供应商C',
-                    isUnpick: true,
-                    coefficient: 4,
-                    coefficientChild: 3,// coefficientChild 代表外采数量或者岸基直供采购品牌 数量 签收 有几个row
-                    required: false,
-                  },
+                  // coefficientChild: 1, // coefficientChild 代表外采数量或者岸基直供采购品牌 数量 签收 有几个row
                   {
                     outsourcingQuantity: '',
                     directSupply: '20',
                     purchaseBrandId: '2',
                     purchaseQuantity: '5',
                     signedQuantity: '5',
-                    purchaseBrand: '二号',
+                    purchaseBrand: '农夫山泉',
                     supplier: '供应商C',
-                    isUnpick: false,
-                    coefficient: 4,
-                    coefficientChild: 3,
+                    coefficient: 3,
                     required: false,
                   },
                   {
                     outsourcingQuantity: '',
                     directSupply: '20',
                     purchaseBrandId: '2',
-                    purchaseQuantity: '5',
-                    signedQuantity: '5',
-                    purchaseBrand: '二号',
-                    supplier: '供应商C',
-                    isUnpick: false,
-                    coefficient: 4,
-                    coefficientChild: 3,
+                    purchaseQuantity: '52',
+                    signedQuantity: '54',
+                    purchaseBrand: 'DDDD号',
+                    supplier: '供应商G',
+                    coefficient: 3,
                     required: false,
                   },
                 ],
@@ -463,10 +444,31 @@ export default {
                     purchaseBrandId: '1',
                     purchaseQuantity: '3',
                     signedQuantity: '3',
-                    purchaseBrand: '江南五金厂',
-                    supplier: '供应商B',
-                    isUnpick: true,
-                    coefficient: 1,
+                    purchaseBrand: '江南五金厂-WOURTE',
+                    supplier: '供应商G',
+                    coefficient: 3,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '10',
+                    directSupply: '',
+                    purchaseBrandId: '1',
+                    purchaseQuantity: '3',
+                    signedQuantity: '3',
+                    purchaseBrand: '江南五金厂-PIGE',
+                    supplier: '供应商G',
+                    coefficient: 3,
+                    required: false,
+                  },
+                  {
+                    outsourcingQuantity: '10',
+                    directSupply: '',
+                    purchaseBrandId: '1',
+                    purchaseQuantity: '3',
+                    signedQuantity: '3',
+                    purchaseBrand: '江南五金厂-SHAOYAO',
+                    supplier: '供应商GJ',
+                    coefficient: 3,
                     required: false,
                   },
                   {
@@ -477,32 +479,7 @@ export default {
                     signedQuantity: '15',
                     purchaseBrand: '二号',
                     supplier: '供应商C',
-                    isUnpick: true,
-                    coefficient: 3,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '5',
-                    purchaseQuantity: '5',
-                    signedQuantity: '5',
-                    purchaseBrand: 'SAN号',
-                    supplier: '供应商D',
-                    isUnpick: true,
-                    coefficient: 3,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '5',
-                    purchaseQuantity: '5',
-                    signedQuantity: '5',
-                    purchaseBrand: 'WOU号',
-                    supplier: '供应商E',
-                    isUnpick: false,
-                    coefficient: 3,
+                    coefficient: 1,
                     required: false,
                   },
                 ],
