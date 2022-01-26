@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-26 17:16:20
+ * @Last Modified time: 2022-01-26 17:25:32
  */
 
 <template>
@@ -771,7 +771,7 @@ export default {
           )
           this.lableArray.splice(5, 1, { label: '申请数量', width: '90px' })
         } else if (newVal == 2) {
-          // 二级审核 需要显示 审批数量 审批品牌 岸基直接供船数量 采办品牌 供应商 平均采办单价 单价（元）小计（元）
+          // 二级审核 需要显示 审批数量 审批品牌 岸基直接/供船数量 采办品牌 供应商 平均采办单价 单价（元）小计（元）
           this.isEditHeaderArray = ['outsourcingQuantity']
           this.integerArray = ['outsourcingQuantity']
           this.staticArray.splice(
@@ -803,7 +803,7 @@ export default {
               name: 'outsourcingQuantity',
             },
             {
-              width: '150px',
+              width: '70px',
               name: 'directSupply',
             },
             {
@@ -844,8 +844,8 @@ export default {
               width: '90px',
             },
             {
-              label: '岸基直接供船数量',
-              width: '150px',
+              label: '岸基直接/供船数量',
+              width: '70px',
             },
 
             {
@@ -902,7 +902,7 @@ export default {
               name: 'outsourcingQuantity',
             },
             {
-              width: '150px',
+              width: '70px',
               name: 'directSupply',
             },
             {
@@ -950,8 +950,8 @@ export default {
               width: '90px',
             },
             {
-              label: '岸基直接供船数量',
-              width: '150px',
+              label: '岸基直接/供船数量',
+              width: '70px',
             },
             {
               label: '采办数量',
@@ -1004,16 +1004,24 @@ export default {
   created() {},
   methods: {
     renderHeader(h, { column }) {
-      if (column.property === 'required' && this.isEditFlag) {
-        return h('span', [
-          h('i', {
-            class: 'el-icon-star-on',
-            style: 'color: #f91717',
-          }),
-          h('span', column.label),
+      console.log('aaa', column)
+      if (column.label === '岸基直接/供船数量') {
+        return h('span', {}, [
+          h('p', {}, column.label.split('/')[0]),
+          h('p', {}, column.label.split('/')[1]),
         ])
-      } else {
-        return h('span', [h('span', column.label)])
+      }else{
+        if (column.property === 'required' && this.isEditFlag) {
+          return h('span', [
+            h('i', {
+              class: 'el-icon-star-on',
+              style: 'color: #f91717',
+            }),
+            h('span', column.label),
+          ])
+        } else {
+          return h('span', [h('span', column.label)])
+        }
       }
     },
     handleClickRow(row, k) {
@@ -1207,6 +1215,15 @@ export default {
   background-color: rgba(242, 242, 242, 1);
   span:last-child {
     flex: 0.5;
+  }
+}
+/deep/ .el-table__header tr th:nth-child(1n + 0) {
+  p:first-child {
+    margin: 0;
+    height: 1rem;
+  }
+  p {
+    margin: 0;
   }
 }
 </style>
