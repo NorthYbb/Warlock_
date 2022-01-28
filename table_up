@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-26 17:25:32
+ * @Last Modified time: 2022-01-26 17:35:58
  */
 
 <template>
@@ -270,16 +270,36 @@
       </template>
     </el-table-column>
     <el-table-column
-      v-for="v in lableArray"
+      v-for="(v, _tindex) in lableArray"
       :key="v.label"
       :label="v.label"
       :prop="v.title"
       header-align="left"
       align="left"
-      :fixed="v.title == 'title'"
+      :title="v.title"
+      :fixed="_tindex < 1"
       :width="hasOperate ? v.width : v.title == 'remark' ? '480px' : v.width"
       :render-header="renderHeader"
-    />
+    >
+      <template slot-scope="scope">
+        <span
+          :title="scope.row[v.title]"
+          class="device_title"
+          :style="{
+            right:
+              _tindex == 1
+                ? '-2rem'
+                : _tindex == 2
+                ? '7rem'
+                : _tindex == 3
+                ? '-6rem'
+                : '',
+          }"
+        >
+          {{ scope.row[v.title] }}
+        </span>
+      </template>
+    </el-table-column>
     <el-table-column
       label="附件"
       header-align="center"
@@ -335,7 +355,7 @@ export default {
     // 审核标识（0-基础版本or1-一级or2-二级or3-over）
     propsAuditFlag: {
       type: Number,
-      default: 2,
+      default: 3,
     },
     // 是否可以编辑
     isEditFlag: {
@@ -349,7 +369,14 @@ export default {
         return [
           {
             id: '8',
-            title: '喜马拉雅山脉--A',
+            deviceName:
+              '设备名称：主机',
+            deviceModel:
+              '设备型号：MITSUI-MAN B&W',
+            serialNumber:
+              '出厂编号：5316',
+            manufacturers:
+              '制造厂商：江苏安泰动力机械有限公司',
             list: [
               {
                 id: '1',
@@ -503,19 +530,22 @@ export default {
         return [
           {
             label: '物料名称',
-            title: 'title',
+            title: 'deviceName',
             width: '200px',
           },
           {
             label: '规格',
-            width: '250px',
+            title: 'deviceModel',
+            width: '200px',
           },
           {
             label: '说明',
+            title: 'serialNumber',
             width: '350px',
           },
           {
             label: '单位',
+            title: 'manufacturers',
             width: '50px',
           },
           {
@@ -550,7 +580,7 @@ export default {
             name: 'name1',
           },
           {
-            width: '250px',
+            width: '200px',
             name: 'name2',
           },
           {
@@ -1010,7 +1040,7 @@ export default {
           h('p', {}, column.label.split('/')[0]),
           h('p', {}, column.label.split('/')[1]),
         ])
-      }else{
+      } else {
         if (column.property === 'required' && this.isEditFlag) {
           return h('span', [
             h('i', {
@@ -1055,73 +1085,13 @@ export default {
       })
         .then(() => {
           // callback 抛到上层处理,组件接收新的表格数据渲染
+          this.$emit('handelCallbackDel', item, val, key)
         })
         .catch(() => {})
     },
     handleAddToData(arry) {
       // arry 为上层级 传递过来的添加数组
-      let _arry = [
-        {
-          id: '',
-          title: '分类名称--newly',
-          list: [
-            {
-              id: '',
-              name1: '昆仑虚',
-              name2: '800*200',
-              name3: '中国第一神山、万祖之山、昆仑丘或玉山!',
-              name4: '座',
-              name5: '1',
-              applications: '2',
-              brandId: '',
-              brandName: '',
-              auditsNum: '',
-              auditsBrandId: '',
-              auditsBrandName: '',
-              outsourcingQuantity: '98787',
-              directSupply: '',
-              purchaseQuantity: '',
-              signedQuantity: '',
-              purchaseBrand: '',
-              supplier: '',
-              purchasePrice: '3435253',
-              unitPrice: '5454',
-              subtotal: '5676765466',
-              multilevel: [
-                {
-                  outsourcingQuantity: '1111111',
-                  directSupply: '',
-                  purchaseQuantity: '',
-                  signedQuantity: '',
-                  purchaseBrand: '',
-                  supplier: '',
-                  required: false,
-                },
-                {
-                  outsourcingQuantity: '22222',
-                  directSupply: '',
-                  purchaseQuantity: '',
-                  signedQuantity: '',
-                  purchaseBrand: '',
-                  supplier: '',
-                  required: false,
-                },
-              ],
-              remark: '是亚洲中部大山系,也是中国西部山系的主干。',
-              text: '',
-              appendixIds: '',
-              hasShoreBase: false,
-              viceObj: {
-                boundQuantity: '10/0',
-                highestSecurityQuantity: '1/100',
-                signedDate: '2021-09-01/2021-10-01/2021-11-01',
-                signedQuantity: '20/50/54',
-                notSigned: '99',
-              },
-            },
-          ],
-        },
-      ]
+      let _arry = []
       this.tableArray.unshift(..._arry)
     },
     handelSelectBrand(data, j) {
@@ -1156,6 +1126,16 @@ export default {
     tr.el-table__row > td {
       background: #e2edfa;
     }
+  }
+  .device_title {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    position: absolute;
+    z-index: 9999;
+    width: 15rem;
+    top: 15px;
+    right: 0;
   }
 }
 .el-row-box {
