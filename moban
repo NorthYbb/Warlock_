@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-29 10:51:00
+ * @Last Modified time: 2022-01-29 11:45:56
  */
 
 <template>
@@ -290,11 +290,18 @@
           :style="{
             right:
               _tindex == 1
-                ? '-2rem'
+                ? '0'
                 : _tindex == 2
-                ? '7rem'
+                ? '9rem'
                 : _tindex == 3
-                ? '-6rem'
+                ? '-3rem'
+                : '',
+
+            width:
+              _tindex == 1
+                ? '13.2rem'
+                : _tindex == 3
+                ? '-3rem'
                 : '',
           }"
         >
@@ -356,157 +363,7 @@ export default {
     tableData: {
       type: Array,
       default() {
-        return [
-          {
-            id: '8',
-            deviceName: '设备名称：主机',
-            deviceModel: '设备型号：MITSUI-MAN B&W',
-            serialNumber: '出厂编号：5316',
-            manufacturers: '制造厂商：江苏安泰动力机械有限公司',
-            list: [
-              {
-                id: '1',
-                name1: '喜马拉雅山脉',
-                name2: '900*100',
-                name3: '喜马拉雅山脉,藏语意为雪的故乡!',
-                name4: '座',
-                name5: '1',
-                applications: '1',
-                brandId: '1',
-                brandName: '黄金糕',
-                auditsNum: '',
-                auditsBrandId: '2',
-                auditsBrandName: '双皮奶',
-                outsourcingQuantity: '',
-                directSupply: '',
-                purchaseQuantity: '',
-                signedQuantity: '',
-                purchaseBrand: '',
-                supplier: '',
-                purchasePrice: '99974',
-                unitPrice: '5454',
-                subtotal: '9745487',
-                multilevel: [
-                  {
-                    outsourcingQuantity: '10',
-                    directSupply: '',
-                    purchaseBrandId: '1',
-                    purchaseQuantity: '3',
-                    signedQuantity: '3',
-                    purchaseBrand: '安泰运动器材有限公司',
-                    supplier: '供应商A',
-                    coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '15',
-                    purchaseQuantity: '15',
-                    signedQuantity: '15',
-                    purchaseBrand: '农夫山泉',
-                    supplier: '供应商C1',
-                    coefficient: 4,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '2',
-                    purchaseQuantity: '5',
-                    signedQuantity: '5',
-                    purchaseBrand: '农夫山泉',
-                    supplier: '供应商C',
-                    coefficient: 4,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '2',
-                    purchaseQuantity: '52',
-                    signedQuantity: '54',
-                    purchaseBrand: '农夫山泉EE',
-                    supplier: '供应商G',
-                    coefficient: 4,
-                    required: false,
-                  },
-                  {
-                    outsourcingQuantity: '',
-                    directSupply: '20',
-                    purchaseBrandId: '2',
-                    purchaseQuantity: '52',
-                    signedQuantity: '54',
-                    purchaseBrand: '农夫S山泉',
-                    supplier: '供应商EG',
-                    coefficient: 4,
-                    required: false,
-                  },
-                ],
-                remark:
-                  '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
-                text: '',
-                appendixIds: '918149049292996608',
-                hasShoreBase: true,
-                viceObj: {
-                  boundQuantity: '10/0',
-                  highestSecurityQuantity: '1/100',
-                  signedDate: '2021-09-01/2021-10-01/2021-11-01',
-                  signedQuantity: '20/50/54',
-                  notSigned: '99',
-                },
-              },
-              {
-                id: '2',
-                name1: '喜马拉雅山脉',
-                name2: '900*100',
-                name3: '喜马拉雅山脉,藏语意为雪的故乡!',
-                name4: '座',
-                name5: '1',
-                applications: '1',
-                brandId: '1',
-                brandName: '黄金糕',
-                auditsNum: '',
-                auditsBrandId: '2',
-                auditsBrandName: '双皮奶',
-                outsourcingQuantity: '',
-                directSupply: '',
-                purchaseQuantity: '',
-                signedQuantity: '',
-                purchaseBrand: '',
-                supplier: '',
-                purchasePrice: '99974',
-                unitPrice: '5454',
-                subtotal: '9745487',
-                multilevel: [
-                  {
-                    outsourcingQuantity: '10',
-                    directSupply: '',
-                    purchaseBrandId: '1',
-                    purchaseQuantity: '3',
-                    signedQuantity: '3',
-                    purchaseBrand: '安泰运动器材有限公司',
-                    supplier: '供应商A',
-                    coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
-                    required: false,
-                  },
-                ],
-                remark:
-                  '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
-                text: '',
-                appendixIds: '918149049292996608',
-                hasShoreBase: true,
-                viceObj: {
-                  boundQuantity: '10/0',
-                  highestSecurityQuantity: '1/100',
-                  signedDate: '2021-09-01/2021-10-01/2021-11-01',
-                  signedQuantity: '20/50/54',
-                  notSigned: '99',
-                },
-              },
-            ],
-          },
-        ]
+        return []
       },
     },
     // 表头数据
@@ -530,17 +387,17 @@ export default {
         return []
       },
     },
-    // 子集需要合并的字段属性
+    // 子集需要合并的字段属性 个数
     mergeQuantity: {
       type: String,
       default() {
-        return 'coefficient'
+        return ''
       },
     },
     // 子集需要合并的字段属性对象
     multilevelData: {
       type: String,
-      default: 'multilevel',
+      default: '',
     },
     // 灰色文字
     viceArray: {
@@ -558,7 +415,7 @@ export default {
     integerData: {
       type: Array,
       default() {
-        return ['']
+        return []
       },
     },
     // 可编辑表头集合
@@ -572,14 +429,14 @@ export default {
     selectionArray: {
       type: Array,
       default() {
-        return ['brandId', 'brandName', 'auditsBrandId', 'auditsBrandName']
+        return []
       },
     },
     // 千分符
     thousands: {
       type: Array,
       default() {
-        return ['purchasePrice', 'unitPrice', 'subtotal']
+        return []
       },
     },
   },
@@ -666,7 +523,6 @@ export default {
           (item) => item.auditFlag < this.propsAuditFlag + 1
         )
 
-        console.log('>>styleArray', this.lableArray, this.styleArray)
         let _nameArray = []
         this.styleArray.map((m) => {
           _nameArray.push(m.name)
@@ -674,13 +530,6 @@ export default {
         this.styleNameArray = _nameArray
         if (newVal != 3) {
           this.integerArray = this.integerData[newVal]
-        }
-        if (newVal == 1) {
-          // this.isEditHeaderArray = ['auditsNum', 'auditsBrandId', 'remark']
-          // ['applications', 'brandId','auditsNum','auditsBrandId','outsourcingQuantity', 'remark']
-        } else if (newVal == 2) {
-          // 二级审核 需要显示 审批数量 审批品牌 岸基直接/供船数量 采办品牌 供应商 平均采办单价 单价（元）小计（元）
-          // this.isEditHeaderArray = ['outsourcingQuantity']
         }
       },
       immediate: true,
@@ -800,9 +649,9 @@ export default {
     overflow: hidden;
     position: absolute;
     z-index: 9999;
-    width: 15rem;
+    width: 12rem;
     top: 15px;
-    right: 0;
+    right: 3rem;
   }
 }
 .el-row-box {
