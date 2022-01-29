@@ -2,7 +2,13 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-29 11:45:56
+ * @Last Modified time: 2022-01-29 15:12:45
+ * @param {Array} brandArray - 是否显示 全部部门
+ * @param {boolean} landBased - 是否加载岸基部门
+ * @param {boolean} landAndShipBased - 是否为岸基+船端部门
+ * @event emit('on-mounted', val) - 初始化后回调函数 val 加载回来具体的值
+ * @event emit('input', val) - 双向数据绑定的值 可以直接使用 v-model
+ * @event emit('change', val,val2) - 数据改变是触发 change 事件 val 选中的值 val2 当前选中object 节点值
  */
 
 <template>
@@ -281,7 +287,7 @@
       :title="v.title"
       :fixed="_tindex < 1"
       :width="hasOperate ? v.width : v.title == 'remark' ? '480px' : v.width"
-      :render-header="renderHeader"
+      :render-header="(h, obj) => renderHeader(h, obj, v)"
     >
       <template slot-scope="scope">
         <span
@@ -290,19 +296,14 @@
           :style="{
             right:
               _tindex == 1
-                ? '0'
+                ? '2rem'
                 : _tindex == 2
-                ? '9rem'
+                ? '14rem'
                 : _tindex == 3
-                ? '-3rem'
+                ? '1rem'
                 : '',
 
-            width:
-              _tindex == 1
-                ? '13.2rem'
-                : _tindex == 3
-                ? '-3rem'
-                : '',
+            width: _tindex == 1 ? '14rem' : _tindex == 3 ? '15rem' : '',
           }"
         >
           {{ scope.row[v.title] }}
@@ -490,6 +491,13 @@ export default {
       immediate: true,
       deep: true,
     },
+    isEditHeaderData: {
+      handler(newVal, oldVal) {
+        this.isEditHeaderArray = newVal
+      },
+      immediate: true,
+      deep: true,
+    },
     lableData: {
       handler(newVal, oldVal) {
         this.lableArray = newVal
@@ -500,13 +508,6 @@ export default {
     styleData: {
       handler(newVal, oldVal) {
         this.styleArray = newVal
-      },
-      immediate: true,
-      deep: true,
-    },
-    isEditHeaderData: {
-      handler(newVal, oldVal) {
-        this.isEditHeaderArray = newVal
       },
       immediate: true,
       deep: true,
@@ -528,6 +529,7 @@ export default {
           _nameArray.push(m.name)
         })
         this.styleNameArray = _nameArray
+
         if (newVal != 3) {
           this.integerArray = this.integerData[newVal]
         }
@@ -550,14 +552,18 @@ export default {
   },
   created() {},
   methods: {
-    renderHeader(h, { column }) {
+    renderHeader(h, { column }, v) {
       if (column.label === '岸基直接/供船数量') {
         return h('span', {}, [
           h('p', {}, column.label.split('/')[0]),
           h('p', {}, column.label.split('/')[1]),
         ])
       } else {
-        if (column.property === 'required' && this.isEditFlag) {
+        if (
+          column.property === 'required' &&
+          this.isEditFlag &&
+          v.auditFlag == this.propsAuditFlag
+        ) {
           return h('span', [
             h('i', {
               class: 'el-icon-star-on',
@@ -589,6 +595,7 @@ export default {
         }
         this.$set(k, 'required', false)
       }
+      this.$emit('handelCallbackQuantity', row, val, k)
     },
 
     handleDelIcon(item, val, key) {
