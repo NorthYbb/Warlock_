@@ -1,0 +1,456 @@
+
+<template>
+  <TableView class="product" @body-height-change="bodyHeightChange">
+    <!-- 中部内容显示 -->
+    <template slot="body">
+      <table-nomarl
+        :hasOperate="true"
+        :isEditFlag="false"
+        :propsAuditFlag="3"
+        :tableData="tableTestData"
+        :deviceData="deviceData"
+        :mergeData="mergeData"
+        :lableData="lableData"
+        :styleData="styleData"
+        :integerData="integerData"
+        :isEditHeaderData="isEditHeaderData"
+        :viceArray="viceObj"
+        :brandArray="brandArray"
+        :selectionArray="selectionArray"
+        :thousands="thousands"
+        grayFieldData="viceObj"
+        mergeQuantity="coefficient"
+        multilevelData="multilevel"
+        @handelCallbackDel="handelCallbackDel"
+        @handelCallbackQuantity="handelCallbackQuantity"
+      />
+    </template>
+  </TableView>
+</template>
+<script>
+import TableView from '@/layout/TableView'
+import tableNomarl from '@/components/FormControl/FormControlAccordion'
+import TableViewMix from '@/layout/mixin/TableViewMix'
+export default {
+  mixins: [TableViewMix],
+  components: {
+    'table-nomarl': tableNomarl
+  },
+  data() {
+    return {
+      brandArray: [
+        {
+          id: '1',
+          value: '黄金糕',
+        },
+        {
+          id: '2',
+          value: '双皮奶',
+        },
+        {
+          id: '3',
+          value: '蚵仔煎',
+        },
+      ],
+      selectionArray: [
+        'brandId',
+        'brandName',
+        'auditsBrandId',
+        'auditsBrandName',
+      ],
+      thousands: ['purchasePrice', 'unitPrice', 'subtotal'],
+      mergeData: [
+        'outsourcingQuantity',
+        'directSupply',
+        'purchaseQuantity',
+        'signedQuantity',
+        'purchaseBrand',
+        'supplier',
+      ],
+      tableTestData: [
+        {
+          id: '8',
+          deviceName: '主机',
+          deviceModel: 'MITSUI-MAN B&W',
+          serialNumber: '5516316',
+          manufacturers: '江苏安泰动力机械有限公司',
+          totalPrice: '4,000.00',
+          list: [
+            {
+              id: '1',
+              name1: '喜马拉雅山脉',
+              name2: '900*100',
+              name3: '喜马拉雅山脉,藏语意为雪的故乡!',
+              name4: '座',
+              name5: '1',
+              applications: '1',
+              brandId: '1',
+              brandName: '黄金糕',
+              auditsNum: '5',
+              auditsBrandId: '2',
+              auditsBrandName: '双皮奶',
+              outsourcingQuantity: '',
+              directSupply: '',
+              purchaseQuantity: '',
+              signedQuantity: '',
+              purchaseBrand: '',
+              supplier: '',
+              purchasePrice: '99974',
+              unitPrice: '5454',
+              subtotal: '9745487',
+              multilevel: [
+                {
+                  outsourcingQuantity: '10',
+                  directSupply: '',
+                  purchaseBrandId: '1',
+                  purchaseQuantity: '3',
+                  signedQuantity: '3',
+                  purchaseBrand: '安泰运动器材有限公司',
+                  supplier: '供应商A',
+                  coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
+                  required: false,
+                },
+                {
+                  outsourcingQuantity: '',
+                  directSupply: '20',
+                  purchaseBrandId: '15',
+                  purchaseQuantity: '15',
+                  signedQuantity: '15',
+                  purchaseBrand: '农夫山泉',
+                  supplier: '供应商C1',
+                  coefficient: 4,
+                  required: false,
+                },
+                {
+                  outsourcingQuantity: '',
+                  directSupply: '20',
+                  purchaseBrandId: '2',
+                  purchaseQuantity: '5',
+                  signedQuantity: '5',
+                  purchaseBrand: '农夫山泉',
+                  supplier: '供应商C',
+                  coefficient: 4,
+                  required: false,
+                },
+                {
+                  outsourcingQuantity: '',
+                  directSupply: '20',
+                  purchaseBrandId: '2',
+                  purchaseQuantity: '52',
+                  signedQuantity: '54',
+                  purchaseBrand: '农夫山泉EE',
+                  supplier: '供应商G',
+                  coefficient: 4,
+                  required: false,
+                },
+                {
+                  outsourcingQuantity: '',
+                  directSupply: '20',
+                  purchaseBrandId: '2',
+                  purchaseQuantity: '52',
+                  signedQuantity: '54',
+                  purchaseBrand: '农夫S山泉',
+                  supplier: '供应商EG',
+                  coefficient: 4,
+                  required: false,
+                },
+              ],
+              remark:
+                '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
+              text: '',
+              appendixIds: '918149049292996608',
+              hasShoreBase: true,
+              viceObj: {
+                boundQuantity: '10/0',
+                highestSecurityQuantity: '1/100',
+                signedDate: '2021-09-01/2021-10-01/2021-11-01',
+                signedQuantity: '20/50/54',
+                notSigned: '99',
+              },
+            },
+          ],
+        },
+      ],
+      deviceData:[
+        {
+          title:'deviceName',
+          name:'设备名称'
+        },
+        {
+          title:'deviceModel',
+          name:'设备型号'
+        },
+        {
+          title:'serialNumber',
+          name:'出厂编号'
+        },
+        {
+          title:'manufacturers',
+          name:'制造厂商'
+        },
+        {
+          title:'totalPrice',
+          name:'合计'
+        }
+      ],
+      lableData: [
+        {
+          label: '物料名称',
+          width: '200px',
+          title: 'deviceName',
+          auditFlag: '0',
+        },
+        {
+          label: '规格',
+          width: '200px',
+          title: 'deviceModel',
+          auditFlag: '0',
+        },
+        {
+          label: '说明',
+          width: '350px',
+          title: 'serialNumber',
+          auditFlag: '0',
+        },
+        {
+          label: '单位',
+          width: '50px',
+          title: 'manufacturers',
+          auditFlag: '0',
+        },
+        {
+          label: '岸基库存',
+          width: '70px',
+          title: '',
+          auditFlag: '0',
+        },
+        {
+          label: '申请数量',
+          width: '90px',
+          title: 'required',
+          auditFlag: '0',
+        },
+        {
+          label: '申请品牌',
+          width: '150px',
+          title: '',
+          auditFlag: '0',
+        },
+        {
+          label: '审核数量',
+          title: 'required',
+          width: '90px',
+          auditFlag: '1',
+        },
+        {
+          label: '审核品牌',
+          title: 'required',
+          width: '150px',
+          auditFlag: '1',
+        },
+        {
+          label: '外采数量',
+          title: 'required',
+          width: '90px',
+          auditFlag: '2',
+        },
+        {
+          label: '岸基直接/供船数量',
+          width: '70px',
+          title: '',
+          auditFlag: '2',
+        },
+        {
+          label: '采办数量',
+          width: '100px',
+          title: '',
+          auditFlag: '3',
+        },
+        {
+          label: '签收数量',
+          width: '100px',
+          title: '',
+          auditFlag: '3',
+        },
+
+        {
+          label: '采办品牌',
+          width: '150px',
+          title: '',
+          auditFlag: '2',
+        },
+        {
+          label: '供应商',
+          width: '200px',
+          title: '',
+          auditFlag: '2',
+        },
+        {
+          label: '平均采办单价',
+          width: '100px',
+          title: '',
+          auditFlag: '2',
+        },
+        {
+          label: '单价(元)',
+          width: '70px',
+          title: '',
+          auditFlag: '2',
+        },
+        {
+          label: '小计(元)',
+          width: '80px',
+          title: 'totalPrice',
+          auditFlag: '2',
+        },
+        {
+          label: '备注',
+          title: 'remark',
+          width: '450px',
+          auditFlag: '0',
+        },
+      ],
+      styleData: [
+        {
+          width: '200px',
+          name: 'name1',
+          auditFlag: '0',
+        },
+        {
+          width: '200px',
+          name: 'name2',
+          auditFlag: '0',
+        },
+        {
+          width: '350px',
+          name: 'name3',
+          auditFlag: '0',
+        },
+        {
+          width: '50px',
+          name: 'name4',
+          auditFlag: '0',
+        },
+        {
+          width: '70px',
+          name: 'name5',
+          auditFlag: '0',
+        },
+        {
+          width: '90px',
+          name: 'applications',
+          auditFlag: '0',
+        },
+        {
+          width: '150px',
+          name: 'brandId',
+          auditFlag: '0',
+        },
+        {
+          width: '90px',
+          name: 'auditsNum',
+          auditFlag: '1',
+        },
+        {
+          width: '150px',
+          name: 'auditsBrandId',
+          auditFlag: '1',
+        },
+        {
+          width: '90px',
+          name: 'outsourcingQuantity',
+          auditFlag: '2',
+        },
+        {
+          width: '70px',
+          name: 'directSupply',
+          auditFlag: '2',
+        },
+        {
+          width: '100px',
+          name: 'purchaseQuantity',
+          auditFlag: '3',
+        },
+        {
+          width: '100px',
+          name: 'signedQuantity',
+          auditFlag: '3',
+        },
+        {
+          width: '150px',
+          name: 'purchaseBrand',
+          auditFlag: '2',
+        },
+        {
+          width: '200px',
+          name: 'supplier',
+          auditFlag: '2',
+        },
+        {
+          width: '100px',
+          name: 'purchasePrice',
+          auditFlag: '2',
+        },
+        {
+          width: '70px',
+          name: 'unitPrice',
+          auditFlag: '2',
+        },
+        {
+          width: '80px',
+          name: 'subtotal',
+          auditFlag: '2',
+        },
+        {
+          width: '450px',
+          name: 'remark',
+          auditFlag: '0',
+        },
+      ],
+      integerData: ['applications', 'auditsNum', 'outsourcingQuantity'],
+      isEditHeaderData: [
+        {
+          auditFlag: '0',
+          name: 'applications',
+        },
+        {
+          auditFlag: '0',
+          name: 'brandId',
+        },
+        {
+          auditFlag: '1',
+          name: 'auditsNum',
+        },
+        {
+          auditFlag: '1',
+          name: 'auditsBrandId',
+        },
+        {
+          auditFlag: '2',
+          name: 'outsourcingQuantity',
+        },
+        {
+          auditFlag: '',
+          name: 'remark',
+        },
+      ],
+      viceObj: [
+        '近一年入/出库数量',
+        '安全/最高库存',
+        '近3次签收时间',
+        '近3次签收数量',
+        '未签收数量',
+      ],
+    }
+  },
+  created() {},
+  methods: {
+    handelCallbackDel(a, b, c) {
+      console.log('<<<<', a, b, c)
+    },
+    handelCallbackQuantity(a, b, c) {
+      console.log('<<<<', a, b, c)
+    },
+  },
+}
+</script>
