@@ -1,0 +1,391 @@
+/* 
+ * @Author: xzb  
+ * @Date: 2021-09-10 15:45:21  
+ * @Last Modified by: warlock.ss
+ * @Last Modified time: 2022-01-29 10:56:57
+ * @Description: 船舶信息一览
+ */
+<template>
+  <TableView class="product" @body-height-change="bodyHeightChange">
+    <!-- 头部筛选 -->
+    <template slot="header">
+      <BaseHeaderLayout>
+        <!-- 关键字筛选 -->
+        <template slot="right">
+          <BaseInputSearch
+            v-model="page.searchKeyword"
+            :placeholder="$t('shipInfo.message')"
+            @search="getInfoList"
+          />
+        </template>
+      </BaseHeaderLayout>
+    </template>
+    <!-- 中部内容显示 -->
+    <template slot="body">
+      <table-nomarl
+        :hasOperate="true"
+        :isEditFlag="true"
+        :propsAuditFlag="3"
+        :mergeData="mergeData"
+        :lableData="lableData"
+        :styleData="styleData"
+        :integerData="integerData"
+        :isEditHeaderData="isEditHeaderData"
+        :viceArray="viceObj"
+        :brandArray="brandArray"
+        :selectionArray="selectionArray"
+        :thousands="thousands"
+        grayFieldData="viceObj"
+        mergeQuantity="mergeQuantity"
+        multilevelData="multilevel"
+      />
+    </template>
+    <!-- 底部分页显示 -->
+    <template slot="footer">
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        :page.sync="page.currentPage"
+        :limit.sync="page.pageSize"
+        @pagination="getInfoList"
+      />
+    </template>
+  </TableView>
+</template>
+<script>
+import TableView from '@/layout/TableView'
+import Pagination from '@/components/Pagination'
+import tableNomarl from '@/components/FormControl/FormControlAccordion'
+import TableViewMix from '@/layout/mixin/TableViewMix'
+import { getVesselPage } from '@/views/shipInfo/components/request/index'
+export default {
+  mixins: [TableViewMix],
+  components: {
+    Pagination,
+    'table-nomarl': tableNomarl,
+    TableView,
+  },
+  data() {
+    return {
+      brandArray: [
+        {
+          id: '1',
+          value: '黄金糕',
+        },
+        {
+          id: '2',
+          value: '双皮奶',
+        },
+        {
+          id: '3',
+          value: '蚵仔煎',
+        },
+      ],
+      selectionArray: [
+        'brandId',
+        'brandName',
+        'auditsBrandId',
+        'auditsBrandName',
+      ],
+      thousands: ['purchasePrice', 'unitPrice', 'subtotal'],
+      mergeData: [
+        'outsourcingQuantity',
+        'directSupply',
+        'purchaseQuantity',
+        'signedQuantity',
+        'purchaseBrand',
+        'supplier',
+      ],
+      lableData: [
+        {
+          label: '物料名称',
+          title: 'deviceName',
+          width: '200px',
+          auditFlag: '0',
+        },
+        {
+          label: '规格',
+          title: 'deviceModel',
+          width: '200px',
+          auditFlag: '0',
+        },
+        {
+          label: '说明',
+          title: 'serialNumber',
+          width: '350px',
+          auditFlag: '0',
+        },
+        {
+          label: '单位',
+          title: 'manufacturers',
+          width: '50px',
+          auditFlag: '0',
+        },
+        {
+          label: '岸基库存',
+          width: '70px',
+          auditFlag: '0',
+        },
+        {
+          label: '申请数量',
+          title: 'required',
+          width: '90px',
+          auditFlag: '0',
+        },
+        {
+          label: '申请品牌',
+          width: '150px',
+          auditFlag: '0',
+        },
+        {
+          label: '审核数量',
+          title: 'required',
+          width: '90px',
+          auditFlag: '1',
+        },
+        {
+          label: '审核品牌',
+          title: 'required',
+          width: '150px',
+          auditFlag: '1',
+        },
+        {
+          label: '外采数量',
+          title: 'required',
+          width: '90px',
+          auditFlag: '2',
+        },
+        {
+          label: '岸基直接/供船数量',
+          width: '70px',
+          auditFlag: '2',
+        },
+        {
+          label: '采办数量',
+          width: '100px',
+          auditFlag: '3',
+        },
+        {
+          label: '签收数量',
+          width: '100px',
+          auditFlag: '3',
+        },
+
+        {
+          label: '采办品牌',
+          width: '150px',
+          auditFlag: '2',
+        },
+        {
+          label: '供应商',
+          width: '200px',
+          auditFlag: '2',
+        },
+        {
+          label: '平均采办单价',
+          width: '100px',
+          auditFlag: '2',
+        },
+        {
+          label: '单价(元)',
+          width: '70px',
+          auditFlag: '2',
+        },
+        {
+          label: '小计(元)',
+          width: '80px',
+          auditFlag: '2',
+        },
+
+        {
+          label: '备注',
+          title: 'remark',
+          width: '450px',
+          auditFlag: '0',
+        },
+      ],
+      styleData: [
+        {
+          width: '200px',
+          name: 'name1',
+          auditFlag: '0',
+        },
+        {
+          width: '200px',
+          name: 'name2',
+          auditFlag: '0',
+        },
+        {
+          width: '350px',
+          name: 'name3',
+          auditFlag: '0',
+        },
+        {
+          width: '50px',
+          name: 'name4',
+          auditFlag: '0',
+        },
+        {
+          width: '70px',
+          name: 'name5',
+          auditFlag: '0',
+        },
+        {
+          width: '90px',
+          name: 'applications',
+          auditFlag: '0',
+        },
+        {
+          width: '150px',
+          name: 'brandId',
+          auditFlag: '0',
+        },
+        {
+          width: '90px',
+          name: 'auditsNum',
+          auditFlag: '1',
+        },
+        {
+          width: '150px',
+          name: 'auditsBrandId',
+          auditFlag: '1',
+        },
+        {
+          width: '90px',
+          name: 'outsourcingQuantity',
+          auditFlag: '2',
+        },
+        {
+          width: '70px',
+          name: 'directSupply',
+          auditFlag: '2',
+        },
+        {
+          width: '100px',
+          name: 'purchaseQuantity',
+          auditFlag: '3',
+        },
+        {
+          width: '100px',
+          name: 'signedQuantity',
+          auditFlag: '3',
+        },
+        {
+          width: '150px',
+          name: 'purchaseBrand',
+          auditFlag: '2',
+        },
+        {
+          width: '200px',
+          name: 'supplier',
+          auditFlag: '2',
+        },
+        {
+          width: '100px',
+          name: 'purchasePrice',
+          auditFlag: '2',
+        },
+        {
+          width: '70px',
+          name: 'unitPrice',
+          auditFlag: '2',
+        },
+        {
+          width: '80px',
+          name: 'subtotal',
+          auditFlag: '2',
+        },
+        {
+          width: '450px',
+          name: 'remark',
+          auditFlag: '0',
+        },
+      ],
+      integerData: ['applications', 'auditsNum', 'outsourcingQuantity'],
+      isEditHeaderData: [
+        {
+          auditFlag: '0',
+          name: 'applications',
+        },
+        {
+          auditFlag: '0',
+          name: 'brandId',
+        },
+        {
+          auditFlag: '1',
+          name: 'auditsNum',
+        },
+        {
+          auditFlag: '1',
+          name: 'auditsBrandId',
+        },
+        {
+          auditFlag: '2',
+          name: 'outsourcingQuantity',
+        },
+        {
+          auditFlag: '',
+          name: 'remark',
+        },
+      ],
+      viceObj: [
+        '近一年入/出库数量',
+        '安全/最高库存',
+        '近3次签收时间',
+        '近3次签收数量',
+        '未签收数量',
+      ],
+
+      // 筛选相关
+      total: 0,
+      page: {
+        compId: sessionStorage.getItem('ws-pf_compId'),
+        searchKeyword: '',
+        currentPage: 1,
+        pageSize: 10,
+        orderColunm: '',
+        order: '',
+      },
+      // 页面数据显示
+      tableData: [],
+    }
+  },
+  created() {
+    this.getInfoList()
+  },
+  activated() {
+    this.getInfoList()
+  },
+  methods: {
+    // 一览页面信息
+    getInfoList() {
+      getVesselPage(this.page)
+        .toPromise()
+        .then((data) => {
+          this.tableData = data.records
+          this.total = data.total
+        })
+    },
+    // 跳转
+    jumpDetai(row) {
+      this.$router.push({
+        name: 'shipInfoLabel',
+        query: {
+          vesselId: row.vesselId,
+        },
+      })
+    },
+    // 排序
+    sortChange(column) {
+      this.page.orderColunm = column.prop
+      this.page.order = column.order
+      this.getInfoList()
+    },
+  },
+}
+</script>
+<style scoped lang="scss">
+/deep/.input-with-select {
+  width: 350px !important;
+}
+</style>
