@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-29 15:12:45
+ * @Last Modified time: 2022-01-29 15:39:17
  * @param {Array} brandArray - 是否显示 全部部门
  * @param {boolean} landBased - 是否加载岸基部门
  * @param {boolean} landAndShipBased - 是否为岸基+船端部门
@@ -301,9 +301,11 @@
                 ? '14rem'
                 : _tindex == 3
                 ? '1rem'
+                : _tindex == 4
+                ? ''
                 : '',
-
             width: _tindex == 1 ? '14rem' : _tindex == 3 ? '15rem' : '',
+            textAlign: _tindex > 5 ? 'right' : '',
           }"
         >
           {{ scope.row[v.title] }}
@@ -518,18 +520,16 @@ export default {
         // 一级审核 需要显示 审批数量 auditsNum 审批品牌 auditsBrandId
         // isEditHeaderArray styleArray integerArray lableArray
         this.lableArray = this.lableArray.filter(
-          (item) => item.auditFlag < this.propsAuditFlag + 1
+          (item) => item.auditFlag < newVal + 1
         )
         this.styleArray = this.styleArray.filter(
-          (item) => item.auditFlag < this.propsAuditFlag + 1
+          (item) => item.auditFlag < newVal + 1
         )
-
         let _nameArray = []
         this.styleArray.map((m) => {
           _nameArray.push(m.name)
         })
         this.styleNameArray = _nameArray
-
         if (newVal != 3) {
           this.integerArray = this.integerData[newVal]
         }
