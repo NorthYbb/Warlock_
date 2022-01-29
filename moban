@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-29 15:39:17
+ * @Last Modified time: 2022-01-29 16:10:37
  * @param {Array} brandArray - 是否显示 全部部门
  * @param {boolean} landBased - 是否加载岸基部门
  * @param {boolean} landAndShipBased - 是否为岸基+船端部门
@@ -308,7 +308,8 @@
             textAlign: _tindex > 5 ? 'right' : '',
           }"
         >
-          {{ scope.row[v.title] }}
+          <!-- {{ scope.row[v.title] }} -->
+          {{ staticTitle(v.title, scope.row) }}
         </span>
       </template>
     </el-table-column>
@@ -383,6 +384,12 @@ export default {
         return []
       },
     },
+    deviceData: {
+      type: Array,
+      default() {
+        return []
+      },
+    },
     // 合并表头集合
     mergeData: {
       type: Array,
@@ -444,6 +451,18 @@ export default {
     },
   },
   computed: {
+    staticTitle() {
+      return function (val, scope) {
+        if (val) {
+          let _showName = this.deviceData.filter((item) => item.title == val)
+          if (_showName == false) {
+            return ''
+          } else {
+            return _showName[0].name + ':' + scope[_showName[0].title]
+          }
+        }
+      }
+    },
     staticFun() {
       return function (val) {
         let _showName = this.styleNameArray.filter((item) => val.includes(item))
