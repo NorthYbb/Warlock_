@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-30 09:56:08
+ * @Last Modified time: 2022-01-30 10:07:47
  * @param {Array} brandArray - 申请品牌
  * @param {boolean} hasOperate - 是否显示操作列
  * @param {Number}} propsAuditFlag - 审核标识（0-基础版本or1-一级or2-二级or3-over）
@@ -19,8 +19,9 @@
  * @param {Array} selectionArray - select数据表头集合
  * @param {Array} thousands - 千分符
  * @param {Array} showColor - 显示颜色的字段集合
- * @param {Number,String} mergeQuantity - 需要合并的 子集字个数
+ * @param {String,Number} mergeQuantity - 需要合并的 子集字个数
  * @param {String} multilevelData - 需要合并的 子集字段(接口数据中)
+ * @param {String,Number} operateIcon - 操作ICON- 删除1 or 撤回2
  * @event emit('handelCallbackDel', item, val, key) - item-当前数据集合  val-当前删除项  key-当前删除项所归属的设备分类ID(has-子集 OR no-父级)
  * @event emit('handelCallbackQuantity', row, val, k) - row-入力值  val-当前外采项所在对象  k-当前项目
  * @event emit('handelCallbackAcquisitionHistory', data) - data-当前项目 -- 平均采办单价ICON弹出
@@ -279,7 +280,16 @@
             >
               <template>
                 <span @click="handleDelIcon(props.row.list, k, props.row.id)">
-                  <i class="el-icon-delete" style="font-size: 18px"></i>
+                  <i
+                    class="el-icon-delete"
+                    style="font-size: 18px"
+                    v-if="operateIcon == '1'"
+                  ></i>
+                  <i
+                    class="el-icon-back"
+                    style="font-size: 18px"
+                    v-if="operateIcon == '2'"
+                  ></i>
                 </span>
               </template>
             </el-col>
@@ -417,6 +427,10 @@ export default {
     multilevelData: {
       type: String,
       default: '',
+    },
+    operateIcon: {
+      type: [String, Number],
+      default: '1',
     },
     viceArray: {
       type: Array,
