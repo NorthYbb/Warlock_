@@ -165,7 +165,7 @@ export default {
               appendixIds: '918149049292996608',
               hasShoreBase: true,
               rowStatus: '2',
-              rowChecked: false,
+              rowChecked: true,
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
@@ -215,7 +215,7 @@ export default {
               appendixIds: '918149049292996608',
               hasShoreBase: true,
               rowStatus: '1',
-              rowChecked: false,
+              rowChecked: true,
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
