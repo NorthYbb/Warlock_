@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-29 16:42:36
+ * @Last Modified time: 2022-01-30 09:56:08
  * @param {Array} brandArray - 申请品牌
  * @param {boolean} hasOperate - 是否显示操作列
  * @param {Number}} propsAuditFlag - 审核标识（0-基础版本or1-一级or2-二级or3-over）
@@ -18,10 +18,12 @@
  * @param {Array} isEditHeaderData - 可编辑表头集合
  * @param {Array} selectionArray - select数据表头集合
  * @param {Array} thousands - 千分符
+ * @param {Array} showColor - 显示颜色的字段集合
  * @param {Number,String} mergeQuantity - 需要合并的 子集字个数
  * @param {String} multilevelData - 需要合并的 子集字段(接口数据中)
  * @event emit('handelCallbackDel', item, val, key) - item-当前数据集合  val-当前删除项  key-当前删除项所归属的设备分类ID(has-子集 OR no-父级)
  * @event emit('handelCallbackQuantity', row, val, k) - row-入力值  val-当前外采项所在对象  k-当前项目
+ * @event emit('handelCallbackAcquisitionHistory', data) - data-当前项目 -- 平均采办单价ICON弹出
  */
 
 <template>
@@ -155,15 +157,15 @@
                 <span
                   v-if="thousands.includes(j)"
                   :title="k[j]"
-                  style="
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-align: right;
-                    display: block;
-                  "
-                  >{{ $fmoney(k[j] * 1) }}</span
-                >
+                  class="thousands"
+                  >{{ $fmoney(k[j] * 1) }}
+                  <i
+                    class="el-icon-notebook-1"
+                    style="color: #409eff"
+                    v-if="thousands[0] == j"
+                    @click="handelCallbackAcquisitionHistory(k)"
+                  ></i
+                ></span>
                 <span v-else-if="mergeData.includes(j)">
                   <el-row
                     v-for="(g, _gindex) in k[multilevelData]"
@@ -189,6 +191,9 @@
                     <el-col
                       @click="handleClickRow(props.row, k)"
                       :title="g[j]"
+                      :style="{
+                        color: showColor.includes(j) ? '#1890FF' : '',
+                      }"
                       >{{ g[j] }}</el-col
                     >
                   </el-row>
@@ -205,6 +210,7 @@
                   "
                   class="over_text"
                   :style="{
+                    color: showColor.includes(j) ? '#1890FF' : '',
                     '-webkit-box-orient': 'vertical',
                     'text-overflow': 'ellipsis',
                     overflow: 'hidden',
@@ -446,6 +452,12 @@ export default {
         return []
       },
     },
+    showColor: {
+      type: Array,
+      default() {
+        return []
+      },
+    },
   },
   computed: {
     staticTitle() {
@@ -593,8 +605,8 @@ export default {
       }
     },
     handleClickRow(row, k) {
-      // 用于 平均采办单价 历史弹层的操作
-      console.log('aa', row, k)
+      // 点击当前行的事件
+      console.log('handleClickRow', row, k)
     },
     handleInputRow(row, k, auditFlag, val) {
       if (!row) {
@@ -611,35 +623,21 @@ export default {
         }
         this.$set(k, 'required', false)
       }
-      console.log('>row??', row)
-      console.log('>val??', val)
-      console.log('>k??', k)
       this.$emit('handelCallbackQuantity', row, val, k)
     },
 
     handleDelIcon(item, val, key) {
-      let _parentText = '此操作将永久删除设备分类文件, 是否继续?',
-        _childText = '此操作将永久删除子文件, 是否继续?'
-      this.$confirm(key ? _childText : _parentText, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(() => {
-          // callback 抛到上层处理,组件接收新的表格数据渲染
-          this.$emit('handelCallbackDel', item, val, key)
-        })
-        .catch(() => {})
+      this.$emit('handelCallbackDel', item, val, key)
     },
-    handleAddToData(arry) {
-      // arry 为上层级 传递过来的添加数组
-      let _arry = []
-      this.tableArray.unshift(..._arry)
-    },
+
     handelSelectBrand(data, j) {
       let _name = ''
       _name = this.selectionArray[this.selectionArray.indexOf(j) + 1]
       data[_name] = this.brandArray.find((e) => e.id == data[j]).value
+    },
+
+    handelCallbackAcquisitionHistory(data) {
+      this.$emit('handelCallbackAcquisitionHistory', data)
     },
   },
 }
@@ -716,6 +714,13 @@ export default {
     overflow: hidden;
     display: inline-block;
     width: 100%;
+  }
+  .thousands {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: right;
+    display: block;
   }
   .merge_row {
     height: 40px;
