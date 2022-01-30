@@ -1,4 +1,3 @@
-
 <template>
   <TableView class="product" @body-height-change="bodyHeightChange">
     <!-- 中部内容显示 -->
@@ -17,12 +16,14 @@
         :viceArray="viceObj"
         :brandArray="brandArray"
         :selectionArray="selectionArray"
+        :showColor="showColor"
         :thousands="thousands"
         grayFieldData="viceObj"
         mergeQuantity="coefficient"
         multilevelData="multilevel"
         @handelCallbackDel="handelCallbackDel"
         @handelCallbackQuantity="handelCallbackQuantity"
+        @handelCallbackAcquisitionHistory="handelCallbackAcquisitionHistory"
       />
     </template>
   </TableView>
@@ -34,7 +35,8 @@ import TableViewMix from '@/layout/mixin/TableViewMix'
 export default {
   mixins: [TableViewMix],
   components: {
-    'table-nomarl': tableNomarl
+    TableView,
+    'table-nomarl': tableNomarl,
   },
   data() {
     return {
@@ -52,6 +54,7 @@ export default {
           value: '蚵仔煎',
         },
       ],
+      showColor: ['name4'],
       selectionArray: [
         'brandId',
         'brandName',
@@ -171,27 +174,27 @@ export default {
           ],
         },
       ],
-      deviceData:[
+      deviceData: [
         {
-          title:'deviceName',
-          name:'设备名称'
+          title: 'deviceName',
+          name: '设备名称',
         },
         {
-          title:'deviceModel',
-          name:'设备型号'
+          title: 'deviceModel',
+          name: '设备型号',
         },
         {
-          title:'serialNumber',
-          name:'出厂编号'
+          title: 'serialNumber',
+          name: '出厂编号',
         },
         {
-          title:'manufacturers',
-          name:'制造厂商'
+          title: 'manufacturers',
+          name: '制造厂商',
         },
         {
-          title:'totalPrice',
-          name:'合计'
-        }
+          title: 'totalPrice',
+          name: '合计',
+        },
       ],
       lableData: [
         {
@@ -446,10 +449,13 @@ export default {
   created() {},
   methods: {
     handelCallbackDel(a, b, c) {
-      console.log('<<<<', a, b, c)
+      console.log('<<handelCallbackDel<<', a, b, c)
     },
     handelCallbackQuantity(a, b, c) {
-      console.log('<<<<', a, b, c)
+      console.log('<<handelCallbackQuantity<<', a, b, c)
+    },
+    handelCallbackAcquisitionHistory(a) {
+      console.log('<<handelCallbackAcquisitionHistory<<', a)
     },
   },
 }
