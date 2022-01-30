@@ -17,6 +17,7 @@
         :brandArray="brandArray"
         :selectionArray="selectionArray"
         :showColor="showColor"
+        :iconShowArray="iconShowArray"
         :thousands="thousands"
         grayFieldData="viceObj"
         mergeQuantity="coefficient"
@@ -56,6 +57,7 @@ export default {
         },
       ],
       showColor: ['name4'],
+      iconShowArray: ['hasShoreBase', 'rowChecked', 'rowStatus'],
       selectionArray: [
         'brandId',
         'brandName',
@@ -166,6 +168,7 @@ export default {
               hasShoreBase: true,
               rowStatus: '2',
               rowChecked: true,
+              acquisitionHistory: [],
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
@@ -216,6 +219,7 @@ export default {
               hasShoreBase: true,
               rowStatus: '1',
               rowChecked: true,
+              acquisitionHistory: [],
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
