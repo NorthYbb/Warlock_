@@ -3,9 +3,9 @@
     <!-- 中部内容显示 -->
     <template slot="body">
       <table-nomarl
-        :hasOperate="true"
+        :hasOperate="false"
         :isEditFlag="false"
-        :propsAuditFlag="3"
+        :propsAuditFlag="2"
         :tableData="tableTestData"
         :deviceData="deviceData"
         :mergeData="mergeData"
@@ -164,6 +164,58 @@ export default {
               text: '',
               appendixIds: '918149049292996608',
               hasShoreBase: true,
+              rowStatus: '2',
+              rowChecked: false,
+              viceObj: {
+                boundQuantity: '10/0',
+                highestSecurityQuantity: '1/100',
+                signedDate: '2021-09-01/2021-10-01/2021-11-01',
+                signedQuantity: '20/50/54',
+                notSigned: '99',
+              },
+            },
+            {
+              id: '2',
+              name1: '喜马拉雅山脉QQQQ',
+              name2: '900*100',
+              name3: '喜马拉雅山脉,藏语意为雪的故乡!',
+              name4: '座',
+              name5: '1',
+              applications: '1',
+              brandId: '1',
+              brandName: '黄金糕',
+              auditsNum: '5',
+              auditsBrandId: '2',
+              auditsBrandName: '双皮奶',
+              outsourcingQuantity: '',
+              directSupply: '',
+              purchaseQuantity: '',
+              signedQuantity: '',
+              purchaseBrand: '',
+              supplier: '',
+              purchasePrice: '99974',
+              unitPrice: '5454',
+              subtotal: '9745487',
+              multilevel: [
+                {
+                  outsourcingQuantity: '10',
+                  directSupply: '',
+                  purchaseBrandId: '1',
+                  purchaseQuantity: '3',
+                  signedQuantity: '3',
+                  purchaseBrand: '安泰运动器材有限公司',
+                  supplier: '供应商A',
+                  coefficient: 1, // coefficient 代表外采数量或者岸基直供有几个el-row
+                  required: false,
+                },
+              ],
+              remark:
+                '是东亚大陆与南亚次大陆的天然界山,也是中国与印度、尼泊尔、不丹、巴基斯坦等国的天山。',
+              text: '',
+              appendixIds: '918149049292996608',
+              hasShoreBase: true,
+              rowStatus: '1',
+              rowChecked: false,
               viceObj: {
                 boundQuantity: '10/0',
                 highestSecurityQuantity: '1/100',
