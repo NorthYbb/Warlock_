@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-30 13:54:40
+ * @Last Modified time: 2022-01-30 14:17:57
  * @param {Array} brandArray - 申请品牌
  * @param {boolean} hasOperate - 是否显示操作列
  * @param {Number}} propsAuditFlag - 审核标识（0-基础版本or1-一级or2-二级or3-over）
@@ -22,6 +22,7 @@
  * @param {String,Number} mergeQuantity - 需要合并的 子集字个数
  * @param {String} multilevelData - 需要合并的 子集字段(接口数据中)
  * @param {String,Number} operateIcon - 操作ICON- 删除1 or 撤回2
+ * @param {Array} iconShowArray - 单据行--icon及checked 显示字段
  * @event emit('handelCallbackDel', item, val, key) - item-当前数据集合  val-当前删除项  key-当前删除项所归属的设备分类ID(has-子集 OR no-父级)
  * @event emit('handelCallbackQuantity', row, val, k) - row-入力值  val-当前外采项所在对象  k-当前项目
  * @event emit('handelCallbackAcquisitionHistory', data) - data-当前项目 -- 平均采办单价ICON弹出
@@ -29,7 +30,7 @@
 
 <template>
   <el-table :data="tableArray" class="box-table scrollbar-x" default-expand-all>
-    <el-table-column type="expand" header-align="left" align="left">
+    <el-table-column type="expand" header-align="left" align="left" fixed>
       <template slot-scope="props">
         <div v-for="k in props.row.list" :key="k.id">
           <el-row
@@ -44,7 +45,7 @@
             <!-- col-checked 采办管理一栏模块需要显示rowStatus -->
             <el-col
               class="col-checked"
-              v-if="k.rowChecked"
+              v-if="k[iconShowArray[1]]"
               :style="{
                 lineHeight:
                   propsAuditFlag === 2 || propsAuditFlag === 3
@@ -57,20 +58,28 @@
             <el-col
               class="col-num"
               :style="{
-                width: k.rowChecked ? '27px' : '47px',
+                width: k[iconShowArray[1]] ? '27px' : '47px',
               }"
             >
               <i
-                v-if="k.rowStatus"
+                v-if="k[iconShowArray[2]]"
                 :style="{
-                  left: k.rowChecked ? '1.45rem' : '0',
+                  left: k[iconShowArray[1]] ? '1.45rem' : '0',
                 }"
               >
-                <img src="@/assets/yellow.png" alt v-if="k.rowStatus == 1" />
-                <img src="@/assets/gai.png" alt v-if="k.rowStatus == 2" />
+                <img
+                  src="@/assets/yellow.png"
+                  alt
+                  v-if="k[iconShowArray[2]] == 1"
+                />
+                <img
+                  src="@/assets/gai.png"
+                  alt
+                  v-if="k[iconShowArray[2]] == 2"
+                />
               </i>
               <i
-                v-if="k.hasShoreBase"
+                v-if="k[iconShowArray[0]]"
                 :style="{
                   left: '3.45rem',
                 }"
@@ -195,7 +204,6 @@
                   <i
                     class="el-icon-notebook-1"
                     style="color: #409eff"
-                    v-if="thousands[0] == j"
                     @click="handelCallbackAcquisitionHistory(k)"
                   ></i
                 ></span>
@@ -346,6 +354,7 @@
       header-align="left"
       align="left"
       :title="v.title"
+      :fixed="_tindex < 1"
       :width="hasOperate ? v.width : v.title == 'remark' ? '480px' : v.width"
       :render-header="(h, obj) => renderHeader(h, obj, v)"
     >
@@ -480,6 +489,12 @@ export default {
       },
     },
     isEditHeaderData: {
+      type: Array,
+      default() {
+        return []
+      },
+    },
+    iconShowArray: {
       type: Array,
       default() {
         return []
