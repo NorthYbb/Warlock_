@@ -21,6 +21,7 @@
         grayFieldData="viceObj"
         mergeQuantity="coefficient"
         multilevelData="multilevel"
+        operateIcon="1"
         @handelCallbackDel="handelCallbackDel"
         @handelCallbackQuantity="handelCallbackQuantity"
         @handelCallbackAcquisitionHistory="handelCallbackAcquisitionHistory"
