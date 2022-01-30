@@ -2,7 +2,7 @@
  * @Author: warlock.ss 
  * @Date: 2022-01-24 09:11:45 
  * @Last Modified by: warlock.ss
- * @Last Modified time: 2022-01-30 10:07:47
+ * @Last Modified time: 2022-01-30 13:54:40
  * @param {Array} brandArray - 申请品牌
  * @param {boolean} hasOperate - 是否显示操作列
  * @param {Number}} propsAuditFlag - 审核标识（0-基础版本or1-一级or2-二级or3-over）
@@ -29,7 +29,7 @@
 
 <template>
   <el-table :data="tableArray" class="box-table scrollbar-x" default-expand-all>
-    <el-table-column type="expand" header-align="left" align="left" fixed>
+    <el-table-column type="expand" header-align="left" align="left">
       <template slot-scope="props">
         <div v-for="k in props.row.list" :key="k.id">
           <el-row
@@ -41,8 +41,40 @@
                   : variableHeight + 'px',
             }"
           >
-            <el-col class="col-num">
-              <i v-if="k.hasShoreBase">
+            <!-- col-checked 采办管理一栏模块需要显示rowStatus -->
+            <el-col
+              class="col-checked"
+              v-if="k.rowChecked"
+              :style="{
+                lineHeight:
+                  propsAuditFlag === 2 || propsAuditFlag === 3
+                    ? variableHeight * k[multilevelData].length + 'px'
+                    : variableHeight + 'px',
+              }"
+            >
+              <el-checkbox v-model="checked"></el-checkbox>
+            </el-col>
+            <el-col
+              class="col-num"
+              :style="{
+                width: k.rowChecked ? '27px' : '47px',
+              }"
+            >
+              <i
+                v-if="k.rowStatus"
+                :style="{
+                  left: k.rowChecked ? '1.45rem' : '0',
+                }"
+              >
+                <img src="@/assets/yellow.png" alt v-if="k.rowStatus == 1" />
+                <img src="@/assets/gai.png" alt v-if="k.rowStatus == 2" />
+              </i>
+              <i
+                v-if="k.hasShoreBase"
+                :style="{
+                  left: '3.45rem',
+                }"
+              >
                 <img src="@/assets/new.png" alt />
               </i>
               <span>{{ k.newIndex }}</span>
@@ -314,7 +346,6 @@
       header-align="left"
       align="left"
       :title="v.title"
-      :fixed="_tindex < 1"
       :width="hasOperate ? v.width : v.title == 'remark' ? '480px' : v.width"
       :render-header="(h, obj) => renderHeader(h, obj, v)"
     >
@@ -583,6 +614,7 @@ export default {
 
   data() {
     return {
+      checked: false,
       tableArray: [],
       lableArray: [],
       styleArray: [],
@@ -662,7 +694,7 @@ export default {
   width: 100%;
   border: 1px solid #ccc;
   /deep/.el-table__header-wrapper {
-    tr > th {
+    tr > th:not(:last-of-type) {
       border-right: 1px solid #ccc;
     }
   }
@@ -699,9 +731,14 @@ export default {
   height: 40px;
   align-items: center;
   border-bottom: 1px solid #ccc;
+  .col-checked {
+    width: 21px;
+    border-right: 1px solid #ccc;
+    text-align: center;
+  }
   .col-num {
     border-left: none;
-    width: 47px;
+    width: 27px;
     text-align: center;
     padding: 0;
     > i {
