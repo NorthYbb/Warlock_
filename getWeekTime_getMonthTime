@@ -1,0 +1,54 @@
+Js 获取任意一天所在的周或月的起始日期和结束日期
+
+今天有一个需求，用户选择某一天，然后选择 天 周 月 分别查询 一天 一周和一个月的数据 为了更好的用户体验 前端需要显示当前选择应的起始日期和结束日期。
+
+天就不用说了 直接日历插件就搞定，所以需要两个方法 分别来确定 周和月的起始和结束时间。
+
+先来周的， 已知参数就是选择的某一天，我需要推算这天所在的自然周的 周一和周日分别是哪天。
+
+传入选择的一天 返回 所在的当周的 周一和周日
+
+作者：我是一个前端
+链接：https://www.jianshu.com/p/99dc62e6a287
+来源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+// 获取某天所在的周的起始日期和结束日期，思路是这样的，周几有对应的 int来表示 分别对应
+
+// 1     2    3    4    5   6    0
+//周一  周二  周三  周四 周五 周六 周日
+
+//****我们可以根据 Date的方法来获取当前选择时间对应的 int值 这样我们就知道这天是星期几，在定义一个每天有多少毫秒，来通过加减得到 周一和周日分别对应的时间戳 得到时间戳 就可以随意转换时间格式了，代码如下：
+
+/*
+* 参数time 选择的某一天的时间戳
+*/
+// 获取某天所在的周的起始日期和结束日期
+function getWeekTime(time){
+  let dayCode = new Date(time).getDay();
+  let dayLong = 24*60*60*1000;
+  return {
+      startDay: new Date(dayCode === 0 ? time-dayLong*7 : time-dayLong*(dayCode-1)),
+      endDay: new Date(dayCode === 0 ? time : time+dayLong*(7-dayCode))
+  }
+}
+// 参数传时间戳 返回当前传入时间对应周一和周日两个时间戳
+console.log(getWeekTime(1619074088592))
+// 参数传时间戳 返回当前传入时间对应周一和周日两个时间戳
+console.log(getWeekTime(1605786401242))
+
+接下来是获取所在月的 起始和结束时间
+
+
+// 获取某天所在的月的起始日期和结束日期
+function getMonthTime(time){
+  let currentDay = new Date(time);
+  let currentFullYear = currentDay.getFullYear();
+  let currentMonth = currentDay.getMonth();
+  return {
+    startDay: new Date(currentDay.setDate(1)),
+    endDay: new Date(new Date(currentFullYear,currentMonth+1,0))
+  }
+}
+
+console.log(new Date().getTime())
